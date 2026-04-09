@@ -5,26 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GigShield AI — Income Protection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+/* ─── CUSTOM CURSOR ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; cursor: none !important; }
+#cursor-dot {
+  width: 8px; height: 8px; background: #FD8916; border-radius: 50%;
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99999;
+  transform: translate(-50%,-50%);
+  transition: background 0.2s, transform 0.1s;
+}
+#cursor-ring {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(253,137,22,0.5);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99998;
+  transform: translate(-50%,-50%);
+  transition: width 0.25s, height 0.25s, border-color 0.25s, transform 0.12s;
+}
+body.cursor-hover #cursor-ring { width: 60px; height: 60px; border-color: rgba(253,137,22,0.9); background: rgba(253,137,22,0.05); }
+body.cursor-hover #cursor-dot { transform: translate(-50%,-50%) scale(0); }
+
 /* ─── CSS VARIABLES ─── */
 :root {
   --denim: #173b61;
-  --turquoise: #176916E;
   --turq: #176E6E;
   --grey-blue: #7697A0;
   --orange: #FD8916;
   --pure: #FFEBD0;
-
-  /* Dark theme */
-  --bg: #0a1628;
-  --bg2: #0f1f3d;
-  --bg3: #142447;
-  --surface: #1a2d52;
-  --surface2: #1e3460;
-  --border: rgba(23,110,110,0.3);
-  --border2: rgba(253,137,22,0.25);
+  --bg: #060d1a;
+  --bg2: #0a1628;
+  --bg3: #0f1f3d;
+  --surface: rgba(26,45,82,0.7);
+  --surface2: rgba(30,52,96,0.5);
+  --border: rgba(23,110,110,0.25);
+  --border2: rgba(253,137,22,0.2);
   --text: #FFEBD0;
   --text2: #a8c4d0;
   --text3: #7697A0;
@@ -32,35 +48,31 @@
   --accent2: #176E6E;
   --glow: rgba(253,137,22,0.15);
   --glow2: rgba(23,110,110,0.2);
-  --card: rgba(26,45,82,0.85);
-  --card-border: rgba(23,110,110,0.4);
-  --ai-gradient: linear-gradient(135deg, #176E6E, #173b61);
-  --hero-bg: #0a1628;
+  --card: rgba(12,24,48,0.6);
+  --card-border: rgba(23,110,110,0.3);
+  --glass: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-shine: rgba(255,255,255,0.06);
 }
-
 [data-theme="light"] {
-  --bg: #f0f4f8;
-  --bg2: #e4ecf4;
-  --bg3: #d8e6f0;
-  --surface: #ffffff;
-  --surface2: #f7f9fc;
-  --border: rgba(23,59,97,0.2);
-  --border2: rgba(253,137,22,0.3);
-  --text: #173b61;
+  --bg: #e8f0f8;
+  --bg2: #dce8f5;
+  --bg3: #d0dfee;
+  --surface: rgba(255,255,255,0.7);
+  --surface2: rgba(240,248,255,0.8);
+  --border: rgba(23,59,97,0.15);
+  --border2: rgba(253,137,22,0.25);
+  --text: #0d1e38;
   --text2: #176E6E;
   --text3: #7697A0;
-  --accent: #FD8916;
-  --accent2: #176E6E;
-  --glow: rgba(253,137,22,0.08);
-  --glow2: rgba(23,110,110,0.1);
-  --card: rgba(255,255,255,0.9);
-  --card-border: rgba(23,59,97,0.15);
-  --ai-gradient: linear-gradient(135deg, #176E6E, #173b61);
-  --hero-bg: #e4ecf4;
+  --card: rgba(255,255,255,0.65);
+  --card-border: rgba(23,59,97,0.12);
+  --glass: rgba(255,255,255,0.5);
+  --glass-border: rgba(255,255,255,0.7);
+  --glass-shine: rgba(255,255,255,0.8);
 }
 
-/* ─── RESET ─── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─── BASE ─── */
 html { scroll-behavior: smooth; }
 body {
   font-family: 'DM Sans', sans-serif;
@@ -68,74 +80,67 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  transition: background 0.4s, color 0.4s;
+  transition: background 0.5s, color 0.5s;
 }
+
+/* ─── NOISE TEXTURE OVERLAY ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px;
+}
+[data-theme="light"] body::before { opacity: 0.015; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--turq), var(--orange)); border-radius: 3px; }
+
+/* ─── PROGRESS BAR ─── */
+#scroll-progress {
+  position: fixed; top: 0; left: 0; height: 2px; z-index: 9999;
+  background: linear-gradient(90deg, var(--turq), var(--orange), var(--turq));
+  background-size: 200%;
+  animation: shimmerBar 3s linear infinite;
+  transition: width 0.05s linear;
+}
+@keyframes shimmerBar { 0%{background-position:0%} 100%{background-position:200%} }
 
 /* ─── LOADER ─── */
 #loader {
   position: fixed; inset: 0; z-index: 9999;
-  background: #050d1a;
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column;
-  transition: opacity 0.8s, visibility 0.8s;
+  background: #020810;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  transition: opacity 1s ease, visibility 1s ease;
 }
 #loader.hide { opacity: 0; visibility: hidden; }
 #loader canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.loader-content {
-  position: relative; z-index: 2;
-  text-align: center;
-  animation: loaderFadeIn 1.2s ease forwards;
-}
+.loader-content { position: relative; z-index: 2; text-align: center; animation: loaderReveal 1.5s cubic-bezier(0.16,1,0.3,1) forwards; }
 .loader-logo {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 900;
-  letter-spacing: 0.15em;
-  background: linear-gradient(135deg, #FD8916, #FFEBD0, #176E6E);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
-  margin-bottom: 0.5rem;
+  font-family: 'Cinzel', serif; font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 900; letter-spacing: 0.1em;
+  background: linear-gradient(135deg, #FD8916 0%, #FFEBD0 45%, #176E6E 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 60px rgba(253,137,22,0.3));
 }
-.loader-tagline {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: rgba(255,235,208,0.5);
-  font-weight: 300;
-}
-.loader-bar {
-  width: 200px; height: 2px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 999px;
-  margin: 2rem auto 0;
-  overflow: hidden;
-}
-.loader-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #176E6E, #FD8916);
-  border-radius: 999px;
-  animation: loadBar 2.5s ease forwards;
-}
-@keyframes loadBar { from { width: 0 } to { width: 100% } }
-@keyframes loaderFadeIn { from { opacity: 0; transform: translateY(30px) } to { opacity: 1; transform: none } }
+.loader-tagline { font-size: 0.85rem; letter-spacing: 0.4em; text-transform: uppercase; color: rgba(255,235,208,0.4); font-weight: 300; margin-top: 0.5rem; }
+.loader-bar { width: 240px; height: 1px; background: rgba(255,255,255,0.08); border-radius: 999px; margin: 2.5rem auto 0; overflow: hidden; }
+.loader-bar-fill { height: 100%; background: linear-gradient(90deg, #176E6E, #FD8916, #FFEBD0); border-radius: 999px; animation: loadBar 2.8s cubic-bezier(0.4,0,0.2,1) forwards; }
+@keyframes loadBar { from{width:0} to{width:100%} }
+@keyframes loaderReveal { from{opacity:0;transform:translateY(40px) scale(0.95)} to{opacity:1;transform:none} }
 
 /* ─── THEME TOGGLE ─── */
-.theme-toggle-wrap {
-  position: fixed; top: 1.2rem; right: 1.5rem; z-index: 1000;
-}
-.switch { font-size: 17px; position: relative; display: inline-block; width: 4em; height: 2.2em; border-radius: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+.theme-toggle-wrap { position: fixed; top: 1.2rem; right: 1.5rem; z-index: 1000; }
+.switch { font-size: 17px; position: relative; display: inline-block; width: 4em; height: 2.2em; border-radius: 30px; }
 .switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2a2a2a; transition: 0.4s; border-radius: 30px; overflow: hidden; }
-.slider:before { position: absolute; content: ""; height: 1.2em; width: 1.2em; border-radius: 20px; left: 0.5em; bottom: 0.5em; transition: 0.4s; transition-timing-function: cubic-bezier(0.81,-0.04,0.38,1.5); box-shadow: inset 8px -4px 0px 0px #fff; }
-.switch input:checked + .slider { background-color: #00a6ff; }
+.slider { position: absolute; cursor: none; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); transition: 0.4s; border-radius: 30px; overflow: hidden; }
+.slider:before { position: absolute; content: ""; height: 1.2em; width: 1.2em; border-radius: 20px; left: 0.5em; bottom: 0.5em; transition: 0.4s cubic-bezier(0.81,-0.04,0.38,1.5); box-shadow: inset 8px -4px 0px 0px #fff; }
+.switch input:checked + .slider { background-color: rgba(0,166,255,0.3); }
 .switch input:checked + .slider:before { transform: translateX(1.8em); box-shadow: inset 15px -4px 0px 15px #ffcf48; }
 .star { background-color: #fff; border-radius: 50%; position: absolute; width: 5px; transition: all 0.4s; height: 5px; }
-.star_1 { left: 2.5em; top: 0.5em; }
-.star_2 { left: 2.2em; top: 1.2em; }
-.star_3 { left: 3em; top: 0.9em; }
+.star_1{left:2.5em;top:0.5em} .star_2{left:2.2em;top:1.2em} .star_3{left:3em;top:0.9em}
 .switch input:checked ~ .slider .star { opacity: 0; }
 .cloud { width: 3.5em; position: absolute; bottom: -1.4em; left: -1.1em; opacity: 0; transition: all 0.4s; }
 .switch input:checked ~ .slider .cloud { opacity: 1; }
@@ -143,483 +148,666 @@ body {
 /* ─── NAV ─── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 1rem 2rem;
+  padding: 0 2rem; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(10,22,40,0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  transition: background 0.4s;
+  background: rgba(6,13,26,0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.4s;
 }
-[data-theme="light"] nav { background: rgba(240,244,248,0.92); }
+nav.scrolled { background: rgba(6,13,26,0.92); box-shadow: 0 4px 40px rgba(0,0,0,0.4); }
+[data-theme="light"] nav { background: rgba(232,240,248,0.8); border-bottom-color: rgba(23,59,97,0.1); }
+[data-theme="light"] nav.scrolled { background: rgba(232,240,248,0.96); }
 .nav-logo {
-  font-family: 'Cinzel', serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: 'Cinzel', serif; font-size: 1.35rem; font-weight: 700; letter-spacing: 0.08em;
   background: linear-gradient(135deg, var(--orange), var(--pure));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .nav-links { display: flex; gap: 2rem; list-style: none; }
 .nav-links a {
-  font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--text2); text-decoration: none; font-weight: 500;
-  transition: color 0.2s;
+  font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text3); text-decoration: none; font-weight: 500;
+  transition: color 0.2s; position: relative;
 }
-.nav-links a:hover { color: var(--accent); }
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -3px; left: 0; width: 0; height: 1px;
+  background: var(--orange); transition: width 0.3s ease;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
 .nav-cta {
-  background: linear-gradient(135deg, var(--turq), var(--denim));
+  background: linear-gradient(135deg, rgba(23,110,110,0.3), rgba(23,59,97,0.3)) !important;
   color: var(--pure) !important;
-  padding: 0.5rem 1.2rem; border-radius: 8px;
-  font-weight: 600 !important;
+  padding: 0.45rem 1.2rem; border-radius: 8px;
+  border: 1px solid rgba(23,110,110,0.4) !important;
+  backdrop-filter: blur(10px);
 }
-.nav-cta:hover { opacity: 0.9; }
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { background: linear-gradient(135deg, rgba(23,110,110,0.5), rgba(23,59,97,0.5)) !important; color: white !important; }
+
+/* ─── PARALLAX WRAPPER ─── */
+.parallax-scene { position: relative; overflow: hidden; }
+.parallax-layer { position: absolute; inset: 0; will-change: transform; }
+.parallax-bg { transform: translateY(var(--parallax-bg, 0px)); }
+.parallax-mid { transform: translateY(var(--parallax-mid, 0px)); }
+.parallax-fg { transform: translateY(var(--parallax-fg, 0px)); }
 
 /* ─── HERO ─── */
 #hero {
-  min-height: 100vh;
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; position: relative; display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  background: var(--hero-bg);
 }
-#hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.4; }
-.hero-content {
-  position: relative; z-index: 2;
-  text-align: center;
-  padding: 2rem;
-  max-width: 900px;
+#hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero-orb-1 {
+  position: absolute; width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(23,110,110,0.15) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation: orbFloat1 8s ease-in-out infinite;
 }
+.hero-orb-2 {
+  position: absolute; width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(253,137,22,0.1) 0%, transparent 70%);
+  bottom: -100px; right: -50px;
+  animation: orbFloat2 10s ease-in-out infinite;
+}
+.hero-grid-lines {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(23,110,110,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,110,110,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform: perspective(600px) rotateX(10deg);
+  transform-origin: bottom center;
+}
+@keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(40px,-30px)} 66%{transform:translate(-20px,20px)} }
+@keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-30px,20px)} 66%{transform:translate(20px,-40px)} }
+.hero-content { position: relative; z-index: 2; text-align: center; padding: 2rem; max-width: 900px; }
 .hero-badge {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  background: rgba(23,110,110,0.2);
-  border: 1px solid rgba(23,110,110,0.5);
-  padding: 0.4rem 1rem; border-radius: 999px;
-  font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--turq); font-weight: 600; margin-bottom: 2rem;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: rgba(23,110,110,0.12);
+  border: 1px solid rgba(23,110,110,0.35);
+  padding: 0.45rem 1.2rem; border-radius: 999px;
+  font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #5ecece; font-weight: 600; margin-bottom: 2.5rem;
+  backdrop-filter: blur(10px);
+  animation: badgePulse 4s ease-in-out infinite;
 }
+@keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(23,110,110,0.3)} 50%{box-shadow:0 0 0 8px rgba(23,110,110,0)} }
 .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.8)} }
 .hero-title {
   font-family: 'Cinzel', serif;
-  font-size: clamp(2.8rem, 7vw, 5.5rem);
-  font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: 0.02em;
-  margin-bottom: 1.5rem;
+  font-size: clamp(3rem, 7.5vw, 6rem);
+  font-weight: 900; line-height: 1.02; letter-spacing: 0.02em; margin-bottom: 1.8rem;
 }
 .hero-title .line1 { display: block; color: var(--text); }
 .hero-title .line2 {
   display: block;
-  background: linear-gradient(135deg, var(--orange) 0%, #ffb347 50%, var(--turq) 100%);
+  background: linear-gradient(135deg, var(--orange) 0%, #ffb347 40%, #5ecece 80%, var(--turq) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(253,137,22,0.2));
 }
-.hero-sub {
-  font-size: 1.1rem; color: var(--text2); line-height: 1.7;
-  max-width: 580px; margin: 0 auto 2.5rem;
-}
+.hero-sub { font-size: 1.1rem; color: var(--text2); line-height: 1.75; max-width: 580px; margin: 0 auto 3rem; }
 .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 .btn-primary {
-  padding: 1rem 2.2rem; border-radius: 12px; font-size: 1rem; font-weight: 600;
-  background: linear-gradient(135deg, var(--orange), #e07810);
-  color: #fff; border: none; cursor: pointer;
-  box-shadow: 0 0 30px rgba(253,137,22,0.3);
-  transition: all 0.3s; letter-spacing: 0.03em;
+  padding: 1rem 2.4rem; border-radius: 14px; font-size: 1rem; font-weight: 600;
+  background: linear-gradient(135deg, #FD8916, #e07010);
+  color: #fff; border: none; cursor: none;
+  box-shadow: 0 0 40px rgba(253,137,22,0.25), 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); letter-spacing: 0.02em;
   text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+  position: relative; overflow: hidden;
 }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(253,137,22,0.5); }
+.btn-primary::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 60px rgba(253,137,22,0.4), 0 8px 32px rgba(0,0,0,0.4); }
+.btn-primary:hover::before { opacity: 1; }
 .btn-secondary {
-  padding: 1rem 2.2rem; border-radius: 12px; font-size: 1rem; font-weight: 600;
-  background: transparent; border: 1px solid var(--turq);
-  color: var(--turq); cursor: pointer; transition: all 0.3s; letter-spacing: 0.03em;
+  padding: 1rem 2.4rem; border-radius: 14px; font-size: 1rem; font-weight: 600;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(23,110,110,0.4);
+  color: #5ecece; cursor: none; transition: all 0.3s; letter-spacing: 0.02em;
   text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+  backdrop-filter: blur(10px);
 }
-.btn-secondary:hover { background: rgba(23,110,110,0.15); }
+.btn-secondary:hover { background: rgba(23,110,110,0.12); border-color: rgba(23,110,110,0.7); transform: translateY(-2px); }
 .hero-stats {
-  display: flex; gap: 3rem; justify-content: center; margin-top: 4rem;
-  flex-wrap: wrap;
+  display: flex; gap: 3rem; justify-content: center; margin-top: 5rem; flex-wrap: wrap;
 }
-.hero-stat { text-align: center; }
-.hero-stat .val { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: var(--accent); }
-.hero-stat .lbl { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-top: 0.3rem; }
+.hero-stat { text-align: center; position: relative; }
+.hero-stat::after {
+  content: ''; position: absolute; right: -1.5rem; top: 20%; height: 60%;
+  width: 1px; background: linear-gradient(transparent, var(--border), transparent);
+}
+.hero-stat:last-child::after { display: none; }
+.hero-stat .val {
+  font-family: 'Cinzel', serif; font-size: 2.2rem; font-weight: 700;
+  background: linear-gradient(135deg, var(--orange), #ffb347);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-stat .lbl { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-top: 0.4rem; }
 
-/* ─── AI ENGINES SECTION ─── */
-.section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
-.section-label {
-  font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--turq); font-weight: 600; margin-bottom: 1rem;
-  display: flex; align-items: center; gap: 0.5rem;
+/* ─── GLASS CARD ─── */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
 }
-.section-label::before { content:''; width: 24px; height: 2px; background: var(--turq); }
+.glass::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-shine), transparent);
+}
+.glass-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  position: relative; overflow: hidden;
+}
+.glass-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+}
+.glass-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+}
+[data-theme="light"] .glass-card {
+  background: rgba(255,255,255,0.55);
+  border-color: rgba(255,255,255,0.7);
+}
+
+/* ─── SECTIONS ─── */
+.section { padding: 7rem 2rem; max-width: 1200px; margin: 0 auto; }
+.full-section { padding: 8rem 2rem; }
+.full-section > .inner { max-width: 1200px; margin: 0 auto; }
+.section-label {
+  font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--turq); font-weight: 600; margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.section-label::before { content:''; width: 28px; height: 1px; background: linear-gradient(90deg, var(--turq), transparent); }
 .section-title {
   font-family: 'Cinzel', serif;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 700; margin-bottom: 1rem; color: var(--text);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 700; margin-bottom: 1.2rem; color: var(--text);
+  line-height: 1.1;
 }
-.section-sub { color: var(--text2); max-width: 560px; line-height: 1.7; margin-bottom: 3rem; }
+.section-sub { color: var(--text2); max-width: 560px; line-height: 1.8; margin-bottom: 3.5rem; font-size: 1.02rem; }
 
-/* AI ENGINE CARDS */
-.ai-engines-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
+/* ─── SECTION SEPARATORS ─── */
+.wave-divider { width: 100%; overflow: hidden; line-height: 0; }
+.wave-divider svg { display: block; }
+
+/* ─── AI CARDS ─── */
+.ai-engines-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
 .ai-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 20px; padding: 2rem;
   position: relative; overflow: hidden;
-  transition: all 0.3s;
-  backdrop-filter: blur(10px);
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
+[data-theme="light"] .ai-card { background: rgba(255,255,255,0.6); border-color: rgba(23,59,97,0.1); }
 .ai-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--turq), var(--orange));
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--turq), var(--orange), transparent);
+  opacity: 0.6;
 }
-.ai-card:hover { transform: translateY(-4px); border-color: var(--turq); box-shadow: 0 20px 60px var(--glow2); }
-.ai-card-icon { font-size: 2rem; margin-bottom: 1rem; }
-.ai-card-name { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
-.ai-card-desc { font-size: 0.875rem; color: var(--text2); line-height: 1.6; }
-.ai-card-status {
-  margin-top: 1.2rem; display: inline-flex; align-items: center; gap: 0.4rem;
-  font-size: 0.75rem; color: #4ade80; font-weight: 600; letter-spacing: 0.05em;
-}
-.ai-card-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
-
-/* ─── TRIAL ANALYSIS SECTION ─── */
-#trial { background: linear-gradient(180deg, transparent, rgba(23,59,97,0.1), transparent); }
-.trial-box {
-  background: var(--card); border: 1px solid var(--border2);
-  border-radius: 24px; padding: 3rem; overflow: hidden; position: relative;
-  backdrop-filter: blur(10px);
-}
-.trial-box::after {
-  content: ''; position: absolute; top: -50%; right: -20%;
-  width: 400px; height: 400px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(253,137,22,0.08), transparent);
+.ai-card::after {
+  content: ''; position: absolute; inset: 0; border-radius: 20px;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(23,110,110,0.06), transparent 60%);
+  opacity: 0; transition: opacity 0.4s;
   pointer-events: none;
 }
-.trial-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2.5rem; }
-.trial-badge {
-  background: linear-gradient(135deg, rgba(253,137,22,0.15), rgba(253,137,22,0.05));
-  border: 1px solid rgba(253,137,22,0.4); border-radius: 12px;
-  padding: 0.8rem 1.5rem; text-align: center;
+.ai-card:hover::after { opacity: 1; }
+.ai-card:hover { transform: translateY(-6px) scale(1.01); border-color: rgba(23,110,110,0.3); box-shadow: 0 24px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(23,110,110,0.15); }
+.ai-card-icon { font-size: 2rem; margin-bottom: 1.2rem; display: block; }
+.ai-card-name { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.6rem; }
+.ai-card-desc { font-size: 0.875rem; color: var(--text2); line-height: 1.7; }
+.ai-card-status { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: #4ade80; font-weight: 600; letter-spacing: 0.06em; }
+.ai-card-status .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+
+/* ─── TRIAL ─── */
+.trial-box {
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  border: 1px solid rgba(253,137,22,0.12);
+  border-radius: 28px; padding: 3.5rem; overflow: hidden; position: relative;
 }
-.trial-badge .big { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: var(--accent); display: block; }
-.trial-badge .sm { font-size: 0.75rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
-.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+[data-theme="light"] .trial-box { background: rgba(255,255,255,0.6); }
+.trial-box::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(253,137,22,0.4), transparent);
+}
+.trial-box::after {
+  content: ''; position: absolute; top: -200px; right: -200px;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(253,137,22,0.05), transparent 70%);
+  pointer-events: none;
+}
+.trial-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3rem; }
+.trial-badge {
+  background: rgba(253,137,22,0.08);
+  border: 1px solid rgba(253,137,22,0.3); border-radius: 16px;
+  padding: 1rem 1.8rem; text-align: center;
+  backdrop-filter: blur(10px);
+}
+.trial-badge .big { font-family: 'Cinzel', serif; font-size: 2.2rem; font-weight: 700; color: var(--accent); display: block; }
+.trial-badge .sm { font-size: 0.7rem; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 0.3rem; }
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 @media(max-width:700px){ .charts-grid { grid-template-columns: 1fr; } }
-.chart-box { background: rgba(0,0,0,0.15); border-radius: 16px; padding: 1.5rem; }
-[data-theme="light"] .chart-box { background: rgba(23,59,97,0.05); }
-.chart-title { font-size: 0.85rem; font-weight: 600; color: var(--text2); margin-bottom: 1rem; letter-spacing: 0.05em; }
+.chart-box {
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 16px; padding: 1.5rem;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s;
+}
+[data-theme="light"] .chart-box { background: rgba(23,59,97,0.04); border-color: rgba(23,59,97,0.08); }
+.chart-box:hover { border-color: rgba(23,110,110,0.2); }
+.chart-title { font-size: 0.8rem; font-weight: 600; color: var(--text3); margin-bottom: 1.2rem; letter-spacing: 0.04em; }
 .profit-callout {
-  margin-top: 2rem;
-  background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(23,110,110,0.1));
-  border: 1px solid rgba(74,222,128,0.3); border-radius: 16px;
-  padding: 1.5rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+  margin-top: 2.5rem;
+  background: rgba(74,222,128,0.05);
+  border: 1px solid rgba(74,222,128,0.2); border-radius: 20px;
+  padding: 2rem; display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap;
+  backdrop-filter: blur(10px);
+  position: relative; overflow: hidden;
+}
+.profit-callout::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(74,222,128,0.4), transparent);
 }
 .profit-callout .metric { text-align: center; }
-.profit-callout .metric .v { font-family: 'Cinzel', serif; font-size: 1.8rem; font-weight: 700; color: #4ade80; }
-.profit-callout .metric .l { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.3rem; }
-.profit-callout .profit-msg { flex: 1; font-size: 0.9rem; color: var(--text2); line-height: 1.6; min-width: 200px; }
+.profit-callout .metric .v { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: #4ade80; }
+.profit-callout .metric .l { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.4rem; }
+.profit-callout .profit-msg { flex: 1; font-size: 0.9rem; color: var(--text2); line-height: 1.7; min-width: 200px; }
 
-/* ─── SECURITY SECTION ─── */
+/* ─── SECURITY ─── */
 .security-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
 .security-card {
-  background: var(--card); border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 20px; padding: 2rem; position: relative; overflow: hidden;
-  transition: all 0.3s;
+  transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
 }
-.security-card:hover { border-color: rgba(74,222,128,0.5); transform: translateY(-3px); }
-.security-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, #4ade80, var(--turq));
-}
-.sec-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-.sec-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(23,110,110,0.2));
-  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
-}
-.sec-name { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--text); }
-.sec-score { font-size: 0.75rem; color: #4ade80; font-weight: 600; }
-.signal-bars { display: flex; flex-direction: column; gap: 0.6rem; }
-.signal-row { display: flex; align-items: center; gap: 0.8rem; }
+[data-theme="light"] .security-card { background: rgba(255,255,255,0.65); border-color: rgba(23,59,97,0.1); }
+.security-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(74,222,128,0.4), transparent); }
+.security-card:hover { transform: translateY(-4px); border-color: rgba(74,222,128,0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 80px rgba(74,222,128,0.03); }
+.sec-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.8rem; }
+.sec-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.sec-name { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--text); }
+.sec-score { font-size: 0.7rem; color: #4ade80; font-weight: 700; letter-spacing: 0.1em; margin-top: 0.2rem; }
+.signal-bars { display: flex; flex-direction: column; gap: 0.8rem; }
+.signal-row { display: flex; align-items: center; gap: 1rem; }
 .signal-label { font-size: 0.78rem; color: var(--text2); flex: 1; }
-.signal-bar-wrap { width: 120px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
+.signal-bar-wrap { width: 110px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
 [data-theme="light"] .signal-bar-wrap { background: rgba(0,0,0,0.08); }
-.signal-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--turq), #4ade80); }
-.signal-pct { font-size: 0.75rem; color: #4ade80; font-weight: 600; min-width: 2.5rem; text-align: right; font-family: 'JetBrains Mono', monospace; }
-.verified-badge {
-  margin-top: 1.5rem; display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.78rem; color: #4ade80; font-weight: 600;
-}
-.verified-badge svg { width: 16px; height: 16px; }
+.signal-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--turq), #4ade80); transform: translateX(-100%); transition: transform 1.5s cubic-bezier(0.4,0,0.2,1); }
+.signal-bar-fill.animated { transform: translateX(0); }
+.signal-pct { font-size: 0.72rem; color: #4ade80; font-weight: 600; min-width: 2.5rem; text-align: right; font-family: 'JetBrains Mono', monospace; }
+.verified-badge { margin-top: 1.8rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #4ade80; font-weight: 600; }
+.verified-badge svg { width: 14px; height: 14px; }
+
+/* ─── TRUST RING ─── */
+.trust-ring-wrap { display: flex; align-items: center; gap: 3rem; flex-wrap: wrap; }
+.trust-ring-svg { flex-shrink: 0; filter: drop-shadow(0 0 20px rgba(74,222,128,0.3)); }
+.trust-ring-info .big-score { font-family: 'Cinzel', serif; font-size: 3rem; font-weight: 900; color: #4ade80; line-height: 1; }
+.trust-ring-info .score-lbl { font-size: 0.75rem; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 0.4rem; }
+.trust-ring-info .score-desc { font-size: 0.9rem; color: var(--text2); margin-top: 1.2rem; max-width: 320px; line-height: 1.7; }
 
 /* ─── PRICING ─── */
 .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
 .plan-card {
-  background: var(--card); border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 24px; padding: 2.5rem 2rem; position: relative; overflow: hidden;
-  transition: all 0.3s; text-align: center;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); text-align: center;
 }
+[data-theme="light"] .plan-card { background: rgba(255,255,255,0.65); border-color: rgba(23,59,97,0.1); }
+.plan-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.plan-card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 32px 80px rgba(0,0,0,0.3); }
 .plan-card.popular {
-  border-color: var(--orange); background: linear-gradient(180deg, rgba(253,137,22,0.08), var(--card));
+  border-color: rgba(253,137,22,0.25);
+  background: rgba(253,137,22,0.04);
+  box-shadow: 0 0 80px rgba(253,137,22,0.06);
 }
-.plan-card.popular::before {
+.plan-card.popular::before { background: linear-gradient(90deg, transparent, rgba(253,137,22,0.4), transparent); }
+.plan-card.popular::after {
   content: 'MOST POPULAR'; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  background: var(--orange); color: #fff; font-size: 0.65rem; font-weight: 700;
-  letter-spacing: 0.15em; padding: 0.3rem 1.2rem; border-radius: 0 0 10px 10px;
+  background: linear-gradient(135deg, #FD8916, #e07010); color: #fff; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.2em; padding: 0.3rem 1.2rem; border-radius: 0 0 10px 10px;
 }
-.plan-name { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
-.plan-price { font-family: 'Cinzel', serif; font-size: 2.8rem; font-weight: 900; color: var(--accent); margin-bottom: 0.3rem; }
+.plan-name { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 1.5rem; }
+.plan-price { font-family: 'Cinzel', serif; font-size: 3rem; font-weight: 900; color: var(--accent); margin-bottom: 0.3rem; line-height: 1; }
 .plan-price span { font-size: 1rem; color: var(--text3); font-weight: 400; font-family: 'DM Sans', sans-serif; }
-.plan-period { font-size: 0.8rem; color: var(--text3); margin-bottom: 2rem; }
-.plan-features { list-style: none; margin-bottom: 2rem; text-align: left; display: flex; flex-direction: column; gap: 0.7rem; }
-.plan-features li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; color: var(--text2); }
-.plan-features li::before { content: '✓'; color: #4ade80; font-weight: 700; flex-shrink: 0; }
+.plan-period { font-size: 0.78rem; color: var(--text3); margin-bottom: 2rem; }
+.plan-features { list-style: none; margin-bottom: 2.5rem; text-align: left; display: flex; flex-direction: column; gap: 0.75rem; }
+.plan-features li { display: flex; align-items: center; gap: 0.7rem; font-size: 0.875rem; color: var(--text2); }
+.plan-features li::before { content: '✓'; color: #4ade80; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono'; }
 .plan-btn {
-  width: 100%; padding: 0.9rem; border-radius: 12px; font-size: 0.9rem; font-weight: 600;
-  cursor: pointer; border: none; transition: all 0.3s; letter-spacing: 0.03em;
+  width: 100%; padding: 1rem; border-radius: 12px; font-size: 0.9rem; font-weight: 600;
+  cursor: none; border: none; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); letter-spacing: 0.04em;
 }
-.plan-btn-outline { background: transparent; border: 1px solid var(--turq); color: var(--turq); }
-.plan-btn-outline:hover { background: rgba(23,110,110,0.2); }
-.plan-btn-fill { background: linear-gradient(135deg, var(--orange), #e07810); color: #fff; box-shadow: 0 0 20px rgba(253,137,22,0.3); }
-.plan-btn-fill:hover { transform: translateY(-1px); box-shadow: 0 0 35px rgba(253,137,22,0.5); }
-.plan-btn-dashed { background: transparent; border: 1px dashed var(--border); color: var(--text3); }
-.plan-btn-dashed:hover { border-color: var(--turq); color: var(--turq); }
+.plan-btn-outline { background: transparent; border: 1px solid rgba(23,110,110,0.4); color: #5ecece; }
+.plan-btn-outline:hover { background: rgba(23,110,110,0.12); transform: translateY(-2px); }
+.plan-btn-fill {
+  background: linear-gradient(135deg, var(--orange), #e07010); color: #fff;
+  box-shadow: 0 4px 24px rgba(253,137,22,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.plan-btn-fill:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(253,137,22,0.4); }
+.plan-btn-dashed { background: transparent; border: 1px dashed rgba(255,255,255,0.1); color: var(--text3); }
+.plan-btn-dashed:hover { border-color: rgba(23,110,110,0.4); color: #5ecece; transform: translateY(-2px); }
 
-/* ─── DASHBOARD SECTION ─── */
+/* ─── DASHBOARD ─── */
 .dashboard-wrap {
-  background: var(--card); border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 24px; overflow: hidden;
 }
+[data-theme="light"] .dashboard-wrap { background: rgba(255,255,255,0.65); border-color: rgba(23,59,97,0.1); }
 .dash-header {
-  background: linear-gradient(135deg, var(--denim), #0d2444);
-  padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap;
+  background: linear-gradient(135deg, rgba(23,59,97,0.8), rgba(13,36,68,0.9));
+  padding: 1.8rem 2rem; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
 }
-.dash-header-left { display: flex; flex-direction: column; gap: 0.3rem; }
-.dash-title { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: var(--pure); }
-.dash-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #4ade80; font-weight: 600; }
-.dash-status .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
-.dash-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); }
+.dash-title { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--pure); }
+.dash-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #4ade80; font-weight: 600; margin-top: 0.3rem; }
+.dash-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+.dash-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.04); }
 @media(max-width:700px){ .dash-metrics { grid-template-columns: repeat(2, 1fr); } }
 .dash-metric {
-  background: var(--surface); padding: 1.5rem;
-  display: flex; flex-direction: column; gap: 0.4rem;
+  background: rgba(255,255,255,0.02);
+  padding: 1.8rem; display: flex; flex-direction: column; gap: 0.5rem;
+  transition: background 0.3s;
 }
-.dash-metric .m-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
-.dash-metric .m-val { font-family: 'Cinzel', serif; font-size: 1.8rem; font-weight: 700; color: var(--text); }
-.dash-metric .m-sub { font-size: 0.78rem; color: var(--text3); }
-.dash-body { padding: 2rem; }
-.dash-chart-area { background: rgba(0,0,0,0.15); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; }
-[data-theme="light"] .dash-chart-area { background: rgba(23,59,97,0.05); }
+[data-theme="light"] .dash-metric { background: rgba(255,255,255,0.3); }
+.dash-metric:hover { background: rgba(255,255,255,0.04); }
+.dash-metric .m-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); }
+.dash-metric .m-val { font-family: 'Cinzel', serif; font-size: 1.9rem; font-weight: 700; color: var(--text); }
+.dash-metric .m-sub { font-size: 0.75rem; color: var(--text3); }
+.dash-body { padding: 2.5rem; }
+.dash-chart-area { background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 1.8rem; margin-bottom: 2rem; }
+[data-theme="light"] .dash-chart-area { background: rgba(23,59,97,0.04); border-color: rgba(23,59,97,0.08); }
 .dash-alerts { display: flex; flex-direction: column; gap: 1rem; }
 .alert-item {
-  display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 1.2rem;
-  background: rgba(0,0,0,0.15); border-radius: 12px; border-left: 3px solid var(--accent);
+  display: flex; align-items: flex-start; gap: 1.2rem; padding: 1.2rem 1.5rem;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(10px);
+  border-radius: 14px; border-left: 2px solid var(--accent);
+  transition: all 0.3s; border: 1px solid rgba(255,255,255,0.05); border-left: 2px solid var(--accent);
 }
-[data-theme="light"] .alert-item { background: rgba(23,59,97,0.05); }
+[data-theme="light"] .alert-item { background: rgba(255,255,255,0.4); border-color: rgba(23,59,97,0.1); border-left-color: var(--accent); }
+.alert-item:hover { background: rgba(255,255,255,0.04); transform: translateX(4px); }
 .alert-item.paid { border-left-color: #4ade80; }
 .alert-item.info { border-left-color: var(--turq); }
 .alert-icon { font-size: 1.2rem; flex-shrink: 0; }
-.alert-body .a-title { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
+.alert-body .a-title { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
 .alert-body .a-desc { font-size: 0.8rem; color: var(--text2); }
 .alert-meta { margin-left: auto; text-align: right; flex-shrink: 0; }
-.alert-meta .a-time { font-size: 0.72rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
-.alert-meta .a-badge {
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.2rem 0.6rem;
-  border-radius: 999px; margin-top: 0.3rem; display: inline-block;
-}
-.badge-active { background: rgba(253,137,22,0.15); color: var(--orange); }
-.badge-paid { background: rgba(74,222,128,0.15); color: #4ade80; }
-.badge-review { background: rgba(250,204,21,0.15); color: #facc15; }
+.alert-meta .a-time { font-size: 0.7rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.alert-meta .a-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; padding: 0.2rem 0.6rem; border-radius: 999px; margin-top: 0.4rem; display: inline-block; }
+.badge-active { background: rgba(253,137,22,0.12); color: var(--orange); border: 1px solid rgba(253,137,22,0.25); }
+.badge-paid { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+.badge-review { background: rgba(250,204,21,0.12); color: #facc15; border: 1px solid rgba(250,204,21,0.25); }
+
+/* ─── ZONE MAP ─── */
+.zone-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 1.2rem; }
+.zone-cell { aspect-ratio: 1; border-radius: 6px; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); cursor: none; position: relative; }
+.zone-cell:hover { transform: scale(1.25) translateZ(20px); z-index: 1; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.zone-low { background: rgba(74,222,128,0.2); border: 1px solid rgba(74,222,128,0.1); }
+.zone-med { background: rgba(250,204,21,0.3); border: 1px solid rgba(250,204,21,0.1); }
+.zone-high { background: rgba(239,68,68,0.35); border: 1px solid rgba(239,68,68,0.15); }
+.zone-you { background: var(--orange); animation: pulse 2s infinite; border: 1px solid rgba(253,137,22,0.5); box-shadow: 0 0 16px rgba(253,137,22,0.4); }
+.zone-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.75rem; color: var(--text2); }
+.zone-dot { width: 10px; height: 10px; border-radius: 3px; }
 
 /* ─── CLAIMS ─── */
 .claims-list { display: flex; flex-direction: column; gap: 1rem; }
 .claim-item {
-  display: flex; align-items: center; gap: 1.5rem; padding: 1.2rem 1.5rem;
-  background: var(--surface); border: 1px solid var(--card-border);
-  border-radius: 16px; transition: all 0.2s;
+  display: flex; align-items: center; gap: 1.5rem; padding: 1.3rem 1.8rem;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
-.claim-item:hover { border-color: var(--turq); }
-.claim-icon { font-size: 1.5rem; width: 44px; text-align: center; flex-shrink: 0; }
+[data-theme="light"] .claim-item { background: rgba(255,255,255,0.6); border-color: rgba(23,59,97,0.1); }
+.claim-item:hover { border-color: rgba(23,110,110,0.25); transform: translateX(6px); background: rgba(255,255,255,0.04); }
+.claim-icon { font-size: 1.4rem; width: 44px; text-align: center; flex-shrink: 0; }
 .claim-info { flex: 1; }
-.claim-info .c-title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.2rem; }
-.claim-info .c-meta { font-size: 0.78rem; color: var(--text3); }
+.claim-info .c-title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
+.claim-info .c-meta { font-size: 0.75rem; color: var(--text3); font-family: 'JetBrains Mono'; }
 .claim-amount { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
-.claim-status { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.25rem 0.7rem; border-radius: 999px; white-space: nowrap; }
-.st-paid { background: rgba(74,222,128,0.15); color: #4ade80; }
-.st-processing { background: rgba(250,204,21,0.15); color: #facc15; }
-.st-review { background: rgba(239,68,68,0.15); color: #ef4444; }
+.claim-status { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.3rem 0.8rem; border-radius: 999px; white-space: nowrap; }
+.st-paid { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+.st-processing { background: rgba(250,204,21,0.1); color: #facc15; border: 1px solid rgba(250,204,21,0.2); }
+.st-review { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
 
-/* ─── ONBOARDING FLOW ─── */
+/* ─── ONBOARDING MODAL ─── */
 #onboarding {
   position: fixed; inset: 0; z-index: 500;
-  background: rgba(5,13,26,0.95);
-  backdrop-filter: blur(20px);
-  display: flex; align-items: center; justify-content: center;
-  display: none;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(24px);
+  display: none; align-items: center; justify-content: center;
+  transition: opacity 0.4s;
 }
-#onboarding.show { display: flex; }
+#onboarding.show { display: flex; animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes modalIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:none} }
 .onboard-card {
-  background: var(--surface); border: 1px solid var(--card-border);
-  border-radius: 24px; padding: 3rem;
-  max-width: 540px; width: 90%;
-  position: relative;
+  background: rgba(10,22,40,0.9);
+  backdrop-filter: blur(40px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 28px; padding: 3rem;
+  max-width: 540px; width: 90%; position: relative;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+}
+[data-theme="light"] .onboard-card { background: rgba(248,252,255,0.92); }
+.onboard-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
 }
 .onboard-step { display: none; }
-.onboard-step.active { display: block; }
+.onboard-step.active { display: block; animation: stepIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes stepIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:none} }
 .onboard-title { font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
-.onboard-sub { font-size: 0.9rem; color: var(--text2); margin-bottom: 2rem; line-height: 1.6; }
-.form-group { margin-bottom: 1.2rem; }
-.form-label { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.4rem; display: block; font-weight: 600; }
+.onboard-sub { font-size: 0.9rem; color: var(--text2); margin-bottom: 2rem; line-height: 1.7; }
+.form-group { margin-bottom: 1.3rem; }
+.form-label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; display: block; font-weight: 600; }
 .form-input {
-  width: 100%; padding: 0.8rem 1rem; border-radius: 10px;
-  background: var(--bg2); border: 1px solid var(--border);
+  width: 100%; padding: 0.85rem 1.1rem; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
   color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-  transition: border-color 0.2s; outline: none;
+  transition: all 0.3s; outline: none;
 }
-.form-input:focus { border-color: var(--turq); }
+[data-theme="light"] .form-input { background: rgba(23,59,97,0.06); border-color: rgba(23,59,97,0.15); }
+.form-input:focus { border-color: rgba(23,110,110,0.5); box-shadow: 0 0 0 3px rgba(23,110,110,0.1); }
 .form-select { appearance: none; }
 .platform-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
-.plat-btn {
-  padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem;
-  background: var(--bg2); border: 1px solid var(--border);
-  color: var(--text2); cursor: pointer; transition: all 0.2s;
-}
-.plat-btn.sel { border-color: var(--turq); background: rgba(23,110,110,0.2); color: var(--turq); }
+.plat-btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text2); cursor: none; transition: all 0.2s; backdrop-filter: blur(6px); }
+.plat-btn.sel { border-color: rgba(23,110,110,0.5); background: rgba(23,110,110,0.12); color: #5ecece; }
 .onboard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; }
-.step-dots { display: flex; gap: 0.4rem; }
-.step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
-.step-dot.active { background: var(--orange); width: 24px; border-radius: 4px; }
-.onboard-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text3); font-size: 1.2rem; cursor: pointer; }
-.success-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
-.success-details { background: var(--bg2); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.step-dots { display: flex; gap: 0.5rem; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.step-dot.active { background: var(--orange); width: 28px; border-radius: 4px; }
+.onboard-close { position: absolute; top: 1.2rem; right: 1.2rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); color: var(--text3); font-size: 1rem; cursor: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.onboard-close:hover { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+.success-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; animation: successBounce 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes successBounce { from{transform:scale(0)} to{transform:scale(1)} }
+.success-details { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.3rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.7rem; }
 .success-row { display: flex; justify-content: space-between; font-size: 0.875rem; }
 .success-row .k { color: var(--text3); }
 .success-row .v { color: var(--text); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
 
-/* ─── AI CHAT ─── */
+/* ─── CHAT ─── */
 .chat-wrap {
-  background: var(--card); border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 24px; overflow: hidden; max-height: 600px; display: flex; flex-direction: column;
 }
+[data-theme="light"] .chat-wrap { background: rgba(255,255,255,0.65); border-color: rgba(23,59,97,0.1); }
 .chat-head {
-  background: var(--ai-gradient); padding: 1.2rem 1.5rem;
+  background: linear-gradient(135deg, rgba(23,110,110,0.4), rgba(23,59,97,0.6));
+  backdrop-filter: blur(20px);
+  padding: 1.2rem 1.8rem;
   display: flex; align-items: center; gap: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
-.chat-avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; border: 2px solid rgba(255,255,255,0.3);
-}
+.chat-avatar { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
 .chat-head-info .c-name { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--pure); }
-.chat-head-info .c-status { font-size: 0.75rem; color: rgba(255,235,208,0.7); display: flex; align-items: center; gap: 0.4rem; }
-.chat-head-info .c-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.chat-head-info .c-status { font-size: 0.72rem; color: rgba(255,235,208,0.65); display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem; }
+.chat-head-info .c-status .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 1.8rem; display: flex; flex-direction: column; gap: 1.2rem; }
 .msg { max-width: 80%; }
-.msg-ai { align-self: flex-start; }
-.msg-user { align-self: flex-end; }
-.msg-bubble {
-  padding: 0.8rem 1.1rem; border-radius: 16px; font-size: 0.875rem; line-height: 1.6;
+.msg-ai { align-self: flex-start; animation: msgSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.msg-user { align-self: flex-end; animation: msgSlideInR 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes msgSlideIn { from{opacity:0;transform:translateX(-16px)} to{opacity:1;transform:none} }
+@keyframes msgSlideInR { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:none} }
+.msg-bubble { padding: 0.9rem 1.2rem; border-radius: 16px; font-size: 0.875rem; line-height: 1.65; }
+.msg-ai .msg-bubble {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: var(--text); border-radius: 4px 16px 16px 16px;
 }
-.msg-ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 4px 16px 16px 16px; }
-.msg-user .msg-bubble { background: linear-gradient(135deg, var(--turq), var(--denim)); color: var(--pure); border-radius: 16px 16px 4px 16px; }
+[data-theme="light"] .msg-ai .msg-bubble { background: rgba(23,59,97,0.07); border-color: rgba(23,59,97,0.1); }
+.msg-user .msg-bubble {
+  background: linear-gradient(135deg, rgba(23,110,110,0.5), rgba(23,59,97,0.7));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(23,110,110,0.3);
+  color: var(--pure); border-radius: 16px 16px 4px 16px;
+}
+.typing-indicator { display: flex; gap: 4px; padding: 0.9rem 1.2rem; }
+.typing-dot { width: 6px; height: 6px; background: var(--text3); border-radius: 50%; animation: typingBounce 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 .quick-replies { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0 1.5rem 1rem; }
 .qr-btn {
-  padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.78rem;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text2); cursor: pointer; transition: all 0.2s;
+  padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.76rem;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text2); cursor: none; transition: all 0.25s;
 }
-.qr-btn:hover { border-color: var(--turq); color: var(--turq); }
-.chat-input-area { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.8rem; }
+.qr-btn:hover { border-color: rgba(23,110,110,0.4); color: #5ecece; background: rgba(23,110,110,0.08); transform: translateY(-2px); }
+.chat-input-area { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 0.8rem; }
 .chat-input {
-  flex: 1; padding: 0.7rem 1rem; border-radius: 10px;
-  background: var(--bg2); border: 1px solid var(--border);
+  flex: 1; padding: 0.8rem 1.1rem; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.07);
   color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; outline: none;
+  transition: all 0.3s;
 }
-.chat-input:focus { border-color: var(--turq); }
+[data-theme="light"] .chat-input { background: rgba(23,59,97,0.06); border-color: rgba(23,59,97,0.12); }
+.chat-input:focus { border-color: rgba(23,110,110,0.4); box-shadow: 0 0 0 3px rgba(23,110,110,0.08); }
 .chat-send {
-  padding: 0.7rem 1.2rem; border-radius: 10px;
-  background: var(--turq); color: #fff; border: none; cursor: pointer;
-  font-weight: 600; transition: all 0.2s;
+  padding: 0.8rem 1.4rem; border-radius: 12px;
+  background: linear-gradient(135deg, var(--turq), var(--denim));
+  color: #fff; border: none; cursor: none; font-weight: 600; transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(23,110,110,0.2);
 }
-.chat-send:hover { background: var(--denim); }
+.chat-send:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(23,110,110,0.35); }
 
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+/* ─── FLOATING ELEMENTS ─── */
+.float-badge {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 0.8rem 1.2rem;
+  font-size: 0.8rem; color: var(--text2); font-weight: 500;
+  position: absolute;
+  animation: floatBadge 6s ease-in-out infinite;
+}
+.float-badge-1 { top: 20%; right: 8%; animation-delay: 0s; }
+.float-badge-2 { top: 40%; left: 5%; animation-delay: -2s; }
+.float-badge-3 { bottom: 25%; right: 10%; animation-delay: -4s; }
+@keyframes floatBadge { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+/* ─── ANIMATIONS ─── */
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
+.fade-in { opacity: 0; transform: translateY(28px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.fade-in.visible { opacity: 1; transform: none; }
+.fade-in-left { opacity: 0; transform: translateX(-28px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.fade-in-left.visible { opacity: 1; transform: none; }
+.fade-in-right { opacity: 0; transform: translateX(28px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.fade-in-right.visible { opacity: 1; transform: none; }
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
 
 /* ─── FOOTER ─── */
 footer {
-  border-top: 1px solid var(--border);
-  padding: 3rem 2rem;
-  text-align: center;
-  color: var(--text3);
-  font-size: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 4rem 2rem; text-align: center;
+  color: var(--text3); font-size: 0.85rem;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
 }
-footer .f-logo { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--orange), var(--turq)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
-footer p { margin-top: 0.5rem; }
+footer .f-logo { font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 700; background: linear-gradient(135deg, var(--orange), var(--turq)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
 
-/* ─── FULL PAGE SECTIONS ─── */
-.full-section { padding: 7rem 2rem; }
-.full-section > .inner { max-width: 1200px; margin: 0 auto; }
-
-/* ─── HELPERS ─── */
-.text-center { text-align: center; }
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mb-3 { margin-bottom: 1.5rem; }
-.flex-gap { display: flex; gap: 1rem; flex-wrap: wrap; }
-.divider { height: 1px; background: var(--border); margin: 4rem 0; }
-
-/* ─── ANIMATIONS ─── */
-.fade-in {
-  opacity: 0; transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+/* ─── GLOW SECTIONS ─── */
+.glow-section { position: relative; }
+.glow-section::before {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(23,110,110,0.4), rgba(253,137,22,0.2), transparent);
+  top: 0;
 }
-.fade-in.visible { opacity: 1; transform: none; }
 
 /* ─── RESPONSIVE ─── */
 @media(max-width: 768px) {
-  nav { padding: 1rem; }
+  nav { padding: 0 1rem; }
   .nav-links { display: none; }
-  .hero-stats { gap: 1.5rem; }
-  .section { padding: 4rem 1.5rem; }
-  .full-section { padding: 4rem 1.5rem; }
-  .trial-box { padding: 2rem 1.5rem; }
-  .dash-metrics { grid-template-columns: repeat(2, 1fr); }
+  .hero-stats { gap: 2rem; }
+  .hero-stat::after { display: none; }
+  .section { padding: 5rem 1.5rem; }
+  .full-section { padding: 5rem 1.5rem; }
+  .trial-box { padding: 2rem; }
+  .float-badge { display: none; }
 }
 
-/* ─── ZONE MAP ─── */
-.zone-grid {
-  display: grid; grid-template-columns: repeat(6, 1fr);
-  gap: 3px; margin-bottom: 1rem;
-}
-.zone-cell {
-  aspect-ratio: 1; border-radius: 4px;
-  transition: all 0.3s; cursor: pointer; position: relative;
-}
-.zone-cell:hover { transform: scale(1.2); z-index: 1; }
-.zone-low { background: rgba(74,222,128,0.25); }
-.zone-med { background: rgba(250,204,21,0.35); }
-.zone-high { background: rgba(239,68,68,0.4); }
-.zone-you { background: var(--orange); animation: pulse 2s infinite; }
-.zone-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--text2); }
-.zone-dot { width: 10px; height: 10px; border-radius: 2px; }
-
-/* ─── TRUST METER ─── */
-.trust-ring-wrap { display: flex; align-items: center; gap: 3rem; flex-wrap: wrap; }
-.trust-ring-svg { flex-shrink: 0; }
-.trust-ring-info .big-score { font-family: 'Cinzel', serif; font-size: 3.5rem; font-weight: 900; color: #4ade80; line-height: 1; }
-.trust-ring-info .score-lbl { font-size: 0.8rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.3rem; }
-.trust-ring-info .score-desc { font-size: 0.9rem; color: var(--text2); margin-top: 1rem; max-width: 280px; line-height: 1.6; }
+/* ─── TILT CARD EFFECT ─── */
+.tilt-card { transform-style: preserve-3d; transform: perspective(1000px); }
 </style>
 </head>
 <body>
+
+<!-- ─── CUSTOM CURSOR ─── -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ─── SCROLL PROGRESS ─── -->
+<div id="scroll-progress" style="width:0%"></div>
 
 <!-- ─── LOADER ─── -->
 <div id="loader">
@@ -636,9 +824,7 @@ footer p { margin-top: 0.5rem; }
   <label class="switch">
     <input type="checkbox" id="themeToggle">
     <div class="slider">
-      <div class="star star_1"></div>
-      <div class="star star_2"></div>
-      <div class="star star_3"></div>
+      <div class="star star_1"></div><div class="star star_2"></div><div class="star star_3"></div>
       <svg class="cloud" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
         <path d="M48 36c0-9-7-16-16-16a15.9 15.9 0 0 0-14.1 8.5A10 10 0 0 0 18 48h30a10 10 0 0 0 0-12z" fill="white"/>
       </svg>
@@ -647,7 +833,7 @@ footer p { margin-top: 0.5rem; }
 </div>
 
 <!-- ─── NAV ─── -->
-<nav>
+<nav id="mainNav">
   <div class="nav-logo">GigShield</div>
   <ul class="nav-links">
     <li><a href="#ai-section">AI Engines</a></li>
@@ -655,7 +841,7 @@ footer p { margin-top: 0.5rem; }
     <li><a href="#security-section">Security</a></li>
     <li><a href="#pricing-section">Pricing</a></li>
     <li><a href="#dashboard-section">Dashboard</a></li>
-    <li><a href="#" class="nav-cta" onclick="openOnboarding()">Get Started →</a></li>
+    <li><a href="#" class="nav-cta" onclick="openOnboarding();return false;">Get Started →</a></li>
   </ul>
 </nav>
 
@@ -663,76 +849,49 @@ footer p { margin-top: 0.5rem; }
 <div id="onboarding">
   <div class="onboard-card">
     <button class="onboard-close" onclick="closeOnboarding()">✕</button>
-
-    <!-- Step 1 -->
     <div class="onboard-step active" id="step-1">
       <div class="section-label">Step 1 of 3</div>
       <div class="onboard-title">Your Profile</div>
       <div class="onboard-sub">Tell us about yourself so our AI can build your personalised income model.</div>
-      <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input class="form-input" type="text" placeholder="e.g. Arjun Kumar" id="inp-name">
-      </div>
-      <div class="form-group">
-        <label class="form-label">City</label>
-        <input class="form-input" type="text" placeholder="e.g. Chennai" id="inp-city">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Avg Working Hours / Day</label>
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" placeholder="e.g. Arjun Kumar" id="inp-name"></div>
+      <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="e.g. Chennai" id="inp-city"></div>
+      <div class="form-group"><label class="form-label">Avg Working Hours / Day</label>
         <select class="form-input form-select" id="inp-hours">
-          <option>4–6 hours</option>
-          <option selected>6–8 hours</option>
-          <option>8–10 hours</option>
-          <option>10+ hours</option>
+          <option>4–6 hours</option><option selected>6–8 hours</option><option>8–10 hours</option><option>10+ hours</option>
         </select>
       </div>
       <div class="onboard-nav">
-        <div class="step-dots">
-          <div class="step-dot active"></div>
-          <div class="step-dot"></div>
-          <div class="step-dot"></div>
-        </div>
+        <div class="step-dots"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
         <button class="btn-primary" onclick="goStep(2)">Continue →</button>
       </div>
     </div>
-
-    <!-- Step 2 -->
     <div class="onboard-step" id="step-2">
       <div class="section-label">Step 2 of 3</div>
       <div class="onboard-title">Choose Your Plan</div>
-      <div class="onboard-sub">AI recalculates your rate weekly. Start free for 1 month — see your profit potential.</div>
+      <div class="onboard-sub">Start free for 1 month — AI recalculates your rate weekly.</div>
       <div class="pricing-grid" style="grid-template-columns:1fr 1fr 1fr;gap:0.8rem">
-        <div class="plan-card" style="padding:1.5rem 1rem;cursor:pointer" onclick="selectPlan(this,'Basic')">
+        <div class="plan-card" style="padding:1.5rem 1rem" onclick="selectPlan(this,'Basic')">
           <div class="plan-name" style="font-size:0.9rem">Basic</div>
           <div class="plan-price" style="font-size:1.8rem">₹49<span>/wk</span></div>
           <ul class="plan-features" style="font-size:0.75rem"><li>Weather cover</li><li>₹500/wk max</li><li>1 shift/day</li></ul>
         </div>
-        <div class="plan-card popular" onclick="selectPlan(this,'Pro')" style="padding:1.5rem 1rem;cursor:pointer">
+        <div class="plan-card popular" onclick="selectPlan(this,'Pro')" style="padding:1.5rem 1rem">
           <div class="plan-name" style="font-size:0.9rem">Pro</div>
           <div class="plan-price" style="font-size:1.8rem">₹99<span>/wk</span></div>
           <ul class="plan-features" style="font-size:0.75rem"><li>All disruptions</li><li>₹1,500/wk</li><li>Unlimited shifts</li></ul>
         </div>
-        <div class="plan-card" onclick="selectPlan(this,'Elite')" style="padding:1.5rem 1rem;cursor:pointer">
+        <div class="plan-card" onclick="selectPlan(this,'Elite')" style="padding:1.5rem 1rem">
           <div class="plan-name" style="font-size:0.9rem">Elite</div>
           <div class="plan-price" style="font-size:1.8rem">₹179<span>/wk</span></div>
           <ul class="plan-features" style="font-size:0.75rem"><li>Everything in Pro</li><li>₹3,000/wk</li><li>AI advisor</li></ul>
         </div>
       </div>
-      <p style="font-size:0.8rem;color:var(--turq);margin-top:1rem;text-align:center">✓ First month completely FREE — AI analyses your earnings</p>
+      <p style="font-size:0.78rem;color:#5ecece;margin-top:1rem;text-align:center">✓ First month completely FREE · No credit card needed</p>
       <div class="onboard-nav" style="margin-top:1.5rem">
-        <div class="step-dots">
-          <div class="step-dot"></div>
-          <div class="step-dot active"></div>
-          <div class="step-dot"></div>
-        </div>
-        <div style="display:flex;gap:0.8rem">
-          <button class="btn-secondary" onclick="goStep(1)">← Back</button>
-          <button class="btn-primary" onclick="goStep(3)">Activate →</button>
-        </div>
+        <div class="step-dots"><div class="step-dot"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
+        <div style="display:flex;gap:0.8rem"><button class="btn-secondary" onclick="goStep(1)">← Back</button><button class="btn-primary" onclick="goStep(3)">Activate →</button></div>
       </div>
     </div>
-
-    <!-- Step 3: Success -->
     <div class="onboard-step" id="step-3">
       <div class="success-icon">🛡️</div>
       <div class="onboard-title" style="text-align:center">AI Shield Activated!</div>
@@ -743,18 +902,31 @@ footer p { margin-top: 0.5rem; }
         <div class="success-row"><span class="k">AI Engines</span><span class="v">4 / 4 Active ●</span></div>
         <div class="success-row"><span class="k">Free Trial</span><span class="v">30 Days ✓</span></div>
       </div>
-      <div class="step-dots" style="justify-content:center;margin-bottom:1.5rem">
-        <div class="step-dot"></div><div class="step-dot"></div><div class="step-dot active"></div>
-      </div>
+      <div class="step-dots" style="justify-content:center;margin-bottom:1.5rem;display:flex"><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot active"></div></div>
       <button class="btn-primary" style="width:100%;justify-content:center" onclick="closeOnboarding()">Enter Dashboard →</button>
     </div>
   </div>
 </div>
 
 <!-- ─── HERO ─── -->
-<section id="hero">
+<section id="hero" class="parallax-scene">
   <canvas id="hero-canvas"></canvas>
-  <div class="hero-content">
+  <div class="hero-grid-lines"></div>
+  <div class="hero-orb-1"></div>
+  <div class="hero-orb-2"></div>
+
+  <!-- Floating badges -->
+  <div class="float-badge float-badge-1">
+    <span style="color:#4ade80">●</span> ₹95 auto-paid · 38s
+  </div>
+  <div class="float-badge float-badge-2">
+    🌧️ Rain detected · ₹180 armed
+  </div>
+  <div class="float-badge float-badge-3">
+    🤖 Trust Score 98/100
+  </div>
+
+  <div class="hero-content" data-parallax="0.3">
     <div class="hero-badge"><span class="dot"></span> Powered by Anthropic AI · 4 Live Engines</div>
     <h1 class="hero-title">
       <span class="line1">Zero-Touch</span>
@@ -766,7 +938,7 @@ footer p { margin-top: 0.5rem; }
       <button class="btn-secondary" onclick="document.getElementById('ai-section').scrollIntoView({behavior:'smooth'})">See How It Works</button>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="val">60s</div><div class="lbl">Avg Payout Time</div></div>
+      <div class="hero-stat"><div class="val" data-count="60" data-suffix="s">60s</div><div class="lbl">Avg Payout Time</div></div>
       <div class="hero-stat"><div class="val">91.7%</div><div class="lbl">Auto-Approval Rate</div></div>
       <div class="hero-stat"><div class="val">500m</div><div class="lbl">Zone Precision</div></div>
       <div class="hero-stat"><div class="val">4</div><div class="lbl">Live AI Engines</div></div>
@@ -775,31 +947,31 @@ footer p { margin-top: 0.5rem; }
 </section>
 
 <!-- ─── AI ENGINES ─── -->
-<section id="ai-section" class="full-section">
+<section id="ai-section" class="full-section glow-section">
   <div class="inner">
     <div class="section-label fade-in">Anthropic AI — At the Core</div>
     <h2 class="section-title fade-in">4 AI Engines.<br>Working 24/7 For You.</h2>
     <p class="section-sub fade-in">Not AI in the background — AI as the entire engine. Every decision, every payout, every alert is driven by Anthropic AI models running in real-time.</p>
     <div class="ai-engines-grid">
-      <div class="ai-card fade-in">
+      <div class="ai-card tilt-card fade-in stagger-1">
         <div class="ai-card-icon">🧠</div>
         <div class="ai-card-name">Income Profile AI</div>
         <div class="ai-card-desc">Analyses 47+ days of your earnings to build a personalised income model, detect anomalies, and predict expected daily earnings by hour and zone.</div>
         <div class="ai-card-status"><span class="dot"></span> Running · Learning Your Patterns</div>
       </div>
-      <div class="ai-card fade-in">
+      <div class="ai-card tilt-card fade-in stagger-2">
         <div class="ai-card-icon">⚡</div>
         <div class="ai-card-name">Disruption Detection AI</div>
         <div class="ai-card-desc">Evaluates real-time weather, traffic, platform outages, and pollution signals. Automatically triggers payouts within 60 seconds of a verified income loss event.</div>
         <div class="ai-card-status"><span class="dot"></span> Monitoring · 8 Signals Active</div>
       </div>
-      <div class="ai-card fade-in">
+      <div class="ai-card tilt-card fade-in stagger-3">
         <div class="ai-card-icon">🛡️</div>
         <div class="ai-card-name">Fraud Detection AI</div>
         <div class="ai-card-desc">7-signal validation including GPS consistency, behavioural history, device fingerprint, and network anomaly detection. Every claim gets a confidence score before payout.</div>
         <div class="ai-card-status"><span class="dot"></span> Live · Trust Score 98/100</div>
       </div>
-      <div class="ai-card fade-in">
+      <div class="ai-card tilt-card fade-in stagger-4">
         <div class="ai-card-icon">💰</div>
         <div class="ai-card-name">Adaptive Pricing AI</div>
         <div class="ai-card-desc">Calculates your personalised weekly premium using your risk score, claims history, zone exposure, and loyalty. Better behaviour = lower price, every single week.</div>
@@ -809,8 +981,8 @@ footer p { margin-top: 0.5rem; }
   </div>
 </section>
 
-<!-- ─── 1-MONTH FREE TRIAL ANALYSIS ─── -->
-<section id="trial-section" class="full-section">
+<!-- ─── TRIAL ─── -->
+<section id="trial-section" class="full-section" style="background:linear-gradient(180deg,transparent,rgba(23,59,97,0.05),transparent)">
   <div class="inner">
     <div class="section-label fade-in">Free Trial Feature</div>
     <h2 class="section-title fade-in">See What You've Been Missing</h2>
@@ -818,7 +990,7 @@ footer p { margin-top: 0.5rem; }
     <div class="trial-box fade-in">
       <div class="trial-header">
         <div>
-          <div style="font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:0.5rem">Your Lost Income — Past 30 Days</div>
+          <div style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:0.6rem">Your Lost Income — Past 30 Days</div>
           <div style="font-size:0.875rem;color:var(--text2)">Based on your earnings history, disruptions, and zone data — AI calculated what you could have earned.</div>
         </div>
         <div class="trial-badge">
@@ -827,104 +999,70 @@ footer p { margin-top: 0.5rem; }
         </div>
       </div>
       <div class="charts-grid">
-        <div class="chart-box">
-          <div class="chart-title">📊 Daily Earnings vs AI Expected (Last 30 Days)</div>
-          <canvas id="earningsChart" height="200"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">📈 Income Loss by Disruption Type</div>
-          <canvas id="disruptionChart" height="200"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">📉 Earnings Distribution (Histogram)</div>
-          <canvas id="histChart" height="200"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">🔥 Weekly Payout Recovery</div>
-          <canvas id="recoveryChart" height="200"></canvas>
-        </div>
+        <div class="chart-box"><div class="chart-title">📊 Daily Earnings vs AI Expected (Last 30 Days)</div><canvas id="earningsChart" height="200"></canvas></div>
+        <div class="chart-box"><div class="chart-title">📈 Income Loss by Disruption Type</div><canvas id="disruptionChart" height="200"></canvas></div>
+        <div class="chart-box"><div class="chart-title">📉 Earnings Distribution (Histogram)</div><canvas id="histChart" height="200"></canvas></div>
+        <div class="chart-box"><div class="chart-title">🔥 Weekly Payout Recovery</div><canvas id="recoveryChart" height="200"></canvas></div>
       </div>
       <div class="profit-callout">
         <div class="metric"><div class="v">₹3,840</div><div class="l">Lost to Disruptions</div></div>
         <div class="metric"><div class="v">₹99</div><div class="l">Monthly Shield Cost</div></div>
         <div class="metric"><div class="v">38×</div><div class="l">Return on Investment</div></div>
         <div class="metric"><div class="v">₹3,741</div><div class="l">Net Profit with Shield</div></div>
-        <div class="profit-msg">
-          <strong style="color:var(--text)">If GigShield was active last month,</strong> you would have recovered ₹3,840 in auto-payouts from rain, traffic jams, and platform outages — all for a cost of just ₹99. That's a <strong style="color:#4ade80">38× return</strong> on your subscription.
-        </div>
+        <div class="profit-msg"><strong style="color:var(--text)">If GigShield was active last month,</strong> you would have recovered ₹3,840 in auto-payouts — all for a cost of just ₹99. That's a <strong style="color:#4ade80">38× return</strong> on your subscription.</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ─── SECURITY ─── -->
-<section id="security-section" class="full-section" style="background:linear-gradient(180deg,transparent,rgba(74,222,128,0.03),transparent)">
+<section id="security-section" class="full-section glow-section" style="background:linear-gradient(180deg,transparent,rgba(74,222,128,0.02),transparent)">
   <div class="inner">
     <div class="section-label fade-in">Verified Security — Not Just a Claim</div>
     <h2 class="section-title fade-in">7-Signal Fraud Protection.<br>Every Claim. Every Time.</h2>
-    <p class="section-sub fade-in">We don't just say we're secure — we show you exactly how every claim is validated with live scores and real signal data. No catfishing. No vague promises.</p>
+    <p class="section-sub fade-in">We don't just say we're secure — we show you exactly how every claim is validated with live scores and real signal data.</p>
     <div class="security-grid">
-      <div class="security-card fade-in">
-        <div class="sec-header">
-          <div class="sec-icon">📍</div>
-          <div><div class="sec-name">GPS & Location</div><div class="sec-score">● VERIFIED</div></div>
-        </div>
+      <div class="security-card fade-in stagger-1">
+        <div class="sec-header"><div class="sec-icon">📍</div><div><div class="sec-name">GPS & Location</div><div class="sec-score">● VERIFIED</div></div></div>
         <div class="signal-bars">
           <div class="signal-row"><span class="signal-label">GPS Consistency</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:95%"></div></div><span class="signal-pct">95%</span></div>
           <div class="signal-row"><span class="signal-label">Movement Pattern</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:91%"></div></div><span class="signal-pct">91%</span></div>
           <div class="signal-row"><span class="signal-label">Zone Match</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:98%"></div></div><span class="signal-pct">98%</span></div>
         </div>
-        <div class="verified-badge">
-          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-          Location Verified — 500m precision
-        </div>
+        <div class="verified-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Location Verified — 500m precision</div>
       </div>
-      <div class="security-card fade-in">
-        <div class="sec-header">
-          <div class="sec-icon">📱</div>
-          <div><div class="sec-name">Device & Behaviour</div><div class="sec-score">● VERIFIED</div></div>
-        </div>
+      <div class="security-card fade-in stagger-2">
+        <div class="sec-header"><div class="sec-icon">📱</div><div><div class="sec-name">Device & Behaviour</div><div class="sec-score">● VERIFIED</div></div></div>
         <div class="signal-bars">
           <div class="signal-row"><span class="signal-label">Device Fingerprint</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:100%"></div></div><span class="signal-pct">100%</span></div>
           <div class="signal-row"><span class="signal-label">Behavioural History</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:94%"></div></div><span class="signal-pct">94%</span></div>
           <div class="signal-row"><span class="signal-label">Network Anomaly</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:97%"></div></div><span class="signal-pct">97%</span></div>
         </div>
-        <div class="verified-badge">
-          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-          Device Verified — No spoofing detected
-        </div>
+        <div class="verified-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Device Verified — No spoofing detected</div>
       </div>
-      <div class="security-card fade-in">
-        <div class="sec-header">
-          <div class="sec-icon">🌦️</div>
-          <div><div class="sec-name">Environmental Data</div><div class="sec-score">● LIVE CHECKED</div></div>
-        </div>
+      <div class="security-card fade-in stagger-3">
+        <div class="sec-header"><div class="sec-icon">🌦️</div><div><div class="sec-name">Environmental Data</div><div class="sec-score">● LIVE CHECKED</div></div></div>
         <div class="signal-bars">
           <div class="signal-row"><span class="signal-label">Weather Cross-Check</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:100%"></div></div><span class="signal-pct">100%</span></div>
           <div class="signal-row"><span class="signal-label">Env. Consistency</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:88%"></div></div><span class="signal-pct">88%</span></div>
           <div class="signal-row"><span class="signal-label">Order Activity</span><div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:98%"></div></div><span class="signal-pct">98%</span></div>
         </div>
-        <div class="verified-badge">
-          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-          Real-world data cross-referenced
-        </div>
+        <div class="verified-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Real-world data cross-referenced</div>
       </div>
     </div>
-    <!-- Trust Score -->
-    <div class="ai-card fade-in" style="margin-top:2rem;border-color:rgba(74,222,128,0.4)">
+    <div class="ai-card fade-in" style="margin-top:2rem;border-color:rgba(74,222,128,0.2)">
       <div class="trust-ring-wrap">
         <svg class="trust-ring-svg" width="120" height="120" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(74,222,128,0.15)" stroke-width="10"/>
-          <circle cx="60" cy="60" r="50" fill="none" stroke="#4ade80" stroke-width="10"
-            stroke-dasharray="314" stroke-dashoffset="20" stroke-linecap="round"
-            transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1.5s ease"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(74,222,128,0.08)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="url(#trustGrad)" stroke-width="10" stroke-dasharray="314" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 60 60)" id="trustCircle" style="transition:stroke-dashoffset 2s cubic-bezier(0.4,0,0.2,1)"/>
+          <defs><linearGradient id="trustGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#176E6E"/><stop offset="100%" stop-color="#4ade80"/></linearGradient></defs>
           <text x="60" y="55" text-anchor="middle" font-family="Cinzel,serif" font-size="22" font-weight="700" fill="#4ade80">98</text>
           <text x="60" y="72" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#7697A0">TRUST</text>
         </svg>
         <div class="trust-ring-info">
           <div class="big-score">Excellent</div>
           <div class="score-lbl">47 Days Clean · All 7 Signals Green</div>
-          <div class="score-desc">Your account has the highest trust rating. Every claim is backed by independently verified real-world data — no human review needed. Payouts are fully automatic.</div>
+          <div class="score-desc">Your account has the highest trust rating. Every claim is backed by independently verified real-world data — payouts are fully automatic.</div>
         </div>
       </div>
     </div>
@@ -934,71 +1072,51 @@ footer p { margin-top: 0.5rem; }
 <!-- ─── PRICING ─── -->
 <section id="pricing-section" class="full-section">
   <div class="inner">
-    <div class="section-label fade-in text-center" style="justify-content:center">Affordable for Every Gig Worker</div>
-    <h2 class="section-title fade-in text-center">Protection That Pays For Itself</h2>
-    <p class="section-sub fade-in text-center" style="margin:0 auto 3rem">Less than your daily chai. AI recalculates your rate every week — better behaviour means lower price.</p>
+    <div class="section-label fade-in" style="justify-content:center">Affordable for Every Gig Worker</div>
+    <h2 class="section-title fade-in" style="text-align:center">Protection That Pays For Itself</h2>
+    <p class="section-sub fade-in" style="text-align:center;margin:0 auto 3.5rem">Less than your daily chai. AI recalculates your rate every week — better behaviour means lower price.</p>
     <div class="pricing-grid">
-      <div class="plan-card fade-in">
+      <div class="plan-card fade-in stagger-1">
         <div class="plan-name">Basic Shield</div>
         <div class="plan-price">₹49<span>/wk</span></div>
         <div class="plan-period">~₹7 / day · Less than your chai</div>
-        <ul class="plan-features">
-          <li>Weather coverage</li>
-          <li>₹500/week maximum</li>
-          <li>1 shift per day</li>
-          <li>Basic AI monitoring</li>
-          <li>1 month FREE trial</li>
-        </ul>
+        <ul class="plan-features"><li>Weather coverage</li><li>₹500/week maximum</li><li>1 shift per day</li><li>Basic AI monitoring</li><li>1 month FREE trial</li></ul>
         <button class="plan-btn plan-btn-outline" onclick="openOnboarding()">Start Free Trial</button>
       </div>
-      <div class="plan-card popular fade-in">
+      <div class="plan-card popular fade-in stagger-2">
         <div class="plan-name">Pro Shield</div>
         <div class="plan-price">₹99<span>/wk</span></div>
         <div class="plan-period">~₹14 / day · Most gig workers choose this</div>
-        <ul class="plan-features">
-          <li>All disruption types</li>
-          <li>₹1,500/week maximum</li>
-          <li>Unlimited shifts + OGM</li>
-          <li>Smart relocation alerts</li>
-          <li>Partial loss coverage</li>
-          <li>1 month FREE trial</li>
-        </ul>
+        <ul class="plan-features"><li>All disruption types</li><li>₹1,500/week maximum</li><li>Unlimited shifts + OGM</li><li>Smart relocation alerts</li><li>Partial loss coverage</li><li>1 month FREE trial</li></ul>
         <button class="plan-btn plan-btn-fill" onclick="openOnboarding()">Get Pro — 1 Month Free</button>
       </div>
-      <div class="plan-card fade-in">
+      <div class="plan-card fade-in stagger-3">
         <div class="plan-name">Elite Shield</div>
         <div class="plan-price">₹179<span>/wk</span></div>
         <div class="plan-period">~₹26 / day · For power earners</div>
-        <ul class="plan-features">
-          <li>Everything in Pro</li>
-          <li>₹3,000/week maximum</li>
-          <li>Income stability guarantee</li>
-          <li>Dedicated AI advisor</li>
-          <li>Priority claim processing</li>
-          <li>1 month FREE trial</li>
-        </ul>
+        <ul class="plan-features"><li>Everything in Pro</li><li>₹3,000/week maximum</li><li>Income stability guarantee</li><li>Dedicated AI advisor</li><li>Priority claim processing</li><li>1 month FREE trial</li></ul>
         <button class="plan-btn plan-btn-dashed" onclick="openOnboarding()">Start Free →</button>
       </div>
     </div>
-    <div style="text-align:center;margin-top:2rem;font-size:0.85rem;color:var(--text3)">
+    <div style="text-align:center;margin-top:2.5rem;font-size:0.82rem;color:var(--text3)">
       🔒 All plans include 1 month FREE. No credit card required to start. Cancel anytime.
     </div>
   </div>
 </section>
 
 <!-- ─── DASHBOARD ─── -->
-<section id="dashboard-section" class="full-section" style="background:linear-gradient(180deg,transparent,rgba(23,59,97,0.08),transparent)">
+<section id="dashboard-section" class="full-section glow-section" style="background:linear-gradient(180deg,transparent,rgba(23,59,97,0.06),transparent)">
   <div class="inner">
     <div class="section-label fade-in">Live Dashboard</div>
     <h2 class="section-title fade-in">Everything At a Glance</h2>
     <p class="section-sub fade-in">Real-time metrics, AI alerts, earnings vs predictions — all in one place, always up to date.</p>
     <div class="dashboard-wrap fade-in">
       <div class="dash-header">
-        <div class="dash-header-left">
-          <div class="dash-title">GigShield Dashboard — Thu, Mar 19, 2026</div>
+        <div>
+          <div class="dash-title">GigShield Dashboard — Thu, Apr 9, 2026</div>
           <div class="dash-status"><span class="dot"></span> SHIELD ACTIVE · 4 AI Engines Running</div>
         </div>
-        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:rgba(255,235,208,0.6)">🤖 Anthropic AI &nbsp;·&nbsp; 🌙 Chennai</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:rgba(255,235,208,0.5)">🤖 Anthropic AI &nbsp;·&nbsp; 🌙 Chennai</div>
       </div>
       <div class="dash-metrics">
         <div class="dash-metric"><div class="m-label">Today's Earnings</div><div class="m-val">₹847</div><div class="m-sub">Expected ₹920 · Gap ₹73</div></div>
@@ -1007,49 +1125,25 @@ footer p { margin-top: 0.5rem; }
         <div class="dash-metric"><div class="m-label">Trust Score</div><div class="m-val" style="color:#4ade80">98</div><div class="m-sub">Excellent · No flags</div></div>
       </div>
       <div class="dash-body">
-        <div class="dash-chart-area">
-          <div class="chart-title" style="margin-bottom:1rem">📈 Earnings vs AI Prediction — This Week</div>
-          <canvas id="weekChart" height="120"></canvas>
-        </div>
+        <div class="dash-chart-area"><div class="chart-title" style="margin-bottom:1rem">📈 Earnings vs AI Prediction — This Week</div><canvas id="weekChart" height="120"></canvas></div>
         <div class="dash-alerts">
-          <div class="alert-item">
-            <div class="alert-icon">🌧️</div>
-            <div class="alert-body">
-              <div class="a-title">Heavy Rain — Anna Nagar</div>
-              <div class="a-desc">Orders ↓38%. AI predicts ₹180 loss. Auto-cover armed.</div>
-            </div>
-            <div class="alert-meta"><div class="a-time">14:18</div><div class="a-badge badge-active">ACTIVE</div></div>
-          </div>
-          <div class="alert-item info">
-            <div class="alert-icon">🚦</div>
-            <div class="alert-body">
-              <div class="a-title">Traffic Jam — OMR</div>
-              <div class="a-desc">2.4× delivery time. Relocate to T.Nagar for +₹140/hr.</div>
-            </div>
-            <div class="alert-meta"><div class="a-time">13:55</div><div class="a-badge badge-active">ONGOING</div></div>
-          </div>
-          <div class="alert-item paid">
-            <div class="alert-icon">✅</div>
-            <div class="alert-body">
-              <div class="a-title">Auto-Claim: Swiggy Outage</div>
-              <div class="a-desc">₹95 paid for 27-min outage. Instant payout complete.</div>
-            </div>
-            <div class="alert-meta"><div class="a-time">11:47</div><div class="a-badge badge-paid">PAID</div></div>
-          </div>
+          <div class="alert-item"><div class="alert-icon">🌧️</div><div class="alert-body"><div class="a-title">Heavy Rain — Anna Nagar</div><div class="a-desc">Orders ↓38%. AI predicts ₹180 loss. Auto-cover armed.</div></div><div class="alert-meta"><div class="a-time">14:18</div><div class="a-badge badge-active">ACTIVE</div></div></div>
+          <div class="alert-item info"><div class="alert-icon">🚦</div><div class="alert-body"><div class="a-title">Traffic Jam — OMR</div><div class="a-desc">2.4× delivery time. Relocate to T.Nagar for +₹140/hr.</div></div><div class="alert-meta"><div class="a-time">13:55</div><div class="a-badge badge-active">ONGOING</div></div></div>
+          <div class="alert-item paid"><div class="alert-icon">✅</div><div class="alert-body"><div class="a-title">Auto-Claim: Swiggy Outage</div><div class="a-desc">₹95 paid for 27-min outage. Instant payout complete.</div></div><div class="alert-meta"><div class="a-time">11:47</div><div class="a-badge badge-paid">PAID</div></div></div>
         </div>
       </div>
     </div>
 
     <!-- Zone Map -->
-    <div style="margin-top:3rem" class="fade-in">
+    <div style="margin-top:3.5rem" class="fade-in">
       <div class="section-label" style="margin-bottom:1.5rem">Hyperlocal Micro-Zone Map — Chennai</div>
       <div class="ai-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
           <div style="font-family:'Cinzel',serif;font-size:1rem;color:var(--text)">LIVE · 14:32 · Each cell ≈ 500m²</div>
-          <div style="font-size:0.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace">📍 You are here</div>
+          <div style="font-size:0.75rem;color:var(--text3);font-family:'JetBrains Mono'">📍 You are here</div>
         </div>
         <div class="zone-grid" id="zoneGrid"></div>
-        <div class="zone-legend">
+        <div class="zone-legend" style="margin-top:1rem">
           <span style="display:flex;align-items:center;gap:0.4rem"><span class="zone-dot" style="background:rgba(74,222,128,0.4)"></span>Low Risk</span>
           <span style="display:flex;align-items:center;gap:0.4rem"><span class="zone-dot" style="background:rgba(250,204,21,0.5)"></span>Medium</span>
           <span style="display:flex;align-items:center;gap:0.4rem"><span class="zone-dot" style="background:rgba(239,68,68,0.5)"></span>Severe</span>
@@ -1059,7 +1153,7 @@ footer p { margin-top: 0.5rem; }
     </div>
 
     <!-- Claims -->
-    <div style="margin-top:3rem" class="fade-in">
+    <div style="margin-top:3.5rem" class="fade-in">
       <div class="section-label" style="margin-bottom:1.5rem">Claims History — Zero-Touch Parametric</div>
       <div class="claims-list">
         <div class="claim-item"><div class="claim-icon">📱</div><div class="claim-info"><div class="c-title">Platform Outage — Swiggy</div><div class="c-meta">11:20–11:47 · Anna Nagar · 27 min</div></div><div class="claim-amount">₹95</div><span class="claim-status st-paid">PAID</span></div>
@@ -1072,7 +1166,7 @@ footer p { margin-top: 0.5rem; }
   </div>
 </section>
 
-<!-- ─── AI CHAT ─── -->
+<!-- ─── CHAT ─── -->
 <section class="full-section" style="padding-top:2rem">
   <div class="inner">
     <div class="section-label fade-in">GigShield AI Assistant</div>
@@ -1081,15 +1175,10 @@ footer p { margin-top: 0.5rem; }
     <div class="chat-wrap fade-in">
       <div class="chat-head">
         <div class="chat-avatar">🤖</div>
-        <div class="chat-head-info">
-          <div class="c-name">GigShield AI</div>
-          <div class="c-status"><span class="dot"></span> Powered by Anthropic · Knows your full profile</div>
-        </div>
+        <div class="chat-head-info"><div class="c-name">GigShield AI</div><div class="c-status"><span class="dot"></span> Powered by Anthropic · Knows your full profile</div></div>
       </div>
       <div class="chat-messages" id="chatMessages">
-        <div class="msg msg-ai">
-          <div class="msg-bubble">👋 Hey Arjun! I'm your GigShield AI powered by Anthropic. I know your earnings history, coverage plan, active claims, and live disruption data. Ask me anything!</div>
-        </div>
+        <div class="msg msg-ai"><div class="msg-bubble">👋 Hey Arjun! I'm your GigShield AI powered by Anthropic. I know your earnings history, coverage plan, active claims, and live disruption data. Ask me anything!</div></div>
       </div>
       <div class="quick-replies">
         <button class="qr-btn" onclick="sendQuick('My earnings today')">My earnings today</button>
@@ -1110,163 +1199,199 @@ footer p { margin-top: 0.5rem; }
 <!-- ─── FOOTER ─── -->
 <footer>
   <div class="f-logo">GigShield</div>
-  <p>AI-Powered Income Protection for Gig Workers</p>
-  <p style="margin-top:1rem">© 2026 GigShield. Built with ❤️ for gig workers across India.</p>
+  <p style="margin-top:0.5rem;color:var(--text3)">AI-Powered Income Protection for Gig Workers</p>
+  <p style="margin-top:1rem;color:rgba(118,151,160,0.5);font-size:0.78rem">© 2026 GigShield. Built with ❤️ for gig workers across India.</p>
 </footer>
 
 <script>
-/* ─── LOADER ─── */
+/* ═══════════════════════════════════════
+   CUSTOM CURSOR
+═══════════════════════════════════════ */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animCursor() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('a,button,.plan-card,.ai-card,.claim-item,.qr-btn,.plat-btn,.zone-cell').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+});
+
+/* ═══════════════════════════════════════
+   SCROLL PROGRESS
+═══════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  document.getElementById('scroll-progress').style.width = pct + '%';
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ═══════════════════════════════════════
+   LOADER
+═══════════════════════════════════════ */
 const loaderCanvas = document.getElementById('loader-canvas');
 const lctx = loaderCanvas.getContext('2d');
 let lW, lH, lParticles = [];
-function resizeLoader() {
-  lW = loaderCanvas.width = window.innerWidth;
-  lH = loaderCanvas.height = window.innerHeight;
-}
+function resizeLoader() { lW = loaderCanvas.width = window.innerWidth; lH = loaderCanvas.height = window.innerHeight; }
 resizeLoader();
-for(let i=0;i<120;i++) {
-  lParticles.push({
-    x: Math.random()*lW, y: Math.random()*lH,
-    vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
-    r: Math.random()*1.5+0.3,
-    a: Math.random()*0.6+0.1,
-    color: Math.random()>0.5?'#FD8916':'#176E6E'
-  });
+for(let i=0;i<140;i++) {
+  lParticles.push({ x:Math.random()*lW, y:Math.random()*lH, vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4, r:Math.random()*1.5+0.3, a:Math.random()*0.5+0.1, color:Math.random()>0.5?'#FD8916':'#176E6E' });
 }
 function animateLoader() {
   lctx.clearRect(0,0,lW,lH);
   lParticles.forEach(p => {
-    p.x += p.vx; p.y += p.vy;
-    if(p.x<0||p.x>lW) p.vx*=-1;
-    if(p.y<0||p.y>lH) p.vy*=-1;
-    lctx.beginPath();
-    lctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    lctx.fillStyle = p.color;
-    lctx.globalAlpha = p.a;
-    lctx.fill();
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>lW)p.vx*=-1; if(p.y<0||p.y>lH)p.vy*=-1;
+    lctx.beginPath(); lctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    lctx.fillStyle=p.color; lctx.globalAlpha=p.a; lctx.fill();
   });
   lctx.globalAlpha=1;
-  // draw lines between close particles
-  for(let i=0;i<lParticles.length;i++) {
-    for(let j=i+1;j<lParticles.length;j++) {
-      const dx=lParticles[i].x-lParticles[j].x, dy=lParticles[i].y-lParticles[j].y;
-      const d=Math.sqrt(dx*dx+dy*dy);
-      if(d<120) {
-        lctx.beginPath();
-        lctx.moveTo(lParticles[i].x,lParticles[i].y);
-        lctx.lineTo(lParticles[j].x,lParticles[j].y);
-        lctx.strokeStyle='rgba(23,110,110,'+(0.15*(1-d/120))+')';
-        lctx.lineWidth=0.5; lctx.stroke();
-      }
-    }
+  for(let i=0;i<lParticles.length;i++) for(let j=i+1;j<lParticles.length;j++) {
+    const dx=lParticles[i].x-lParticles[j].x,dy=lParticles[i].y-lParticles[j].y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<130){lctx.beginPath();lctx.moveTo(lParticles[i].x,lParticles[i].y);lctx.lineTo(lParticles[j].x,lParticles[j].y);lctx.strokeStyle=`rgba(23,110,110,${0.12*(1-d/130)})`;lctx.lineWidth=0.5;lctx.stroke();}
   }
-  if(!document.getElementById('loader').classList.contains('hide'))
-    requestAnimationFrame(animateLoader);
+  if(!document.getElementById('loader').classList.contains('hide')) requestAnimationFrame(animateLoader);
 }
 animateLoader();
 setTimeout(() => {
   document.getElementById('loader').classList.add('hide');
   initCharts(); initHeroCanvas(); initZoneGrid();
-}, 3000);
+  animateSignalBars();
+}, 3200);
 
-/* ─── THEME TOGGLE ─── */
+/* ═══════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════ */
 document.getElementById('themeToggle').addEventListener('change', function(){
   document.documentElement.setAttribute('data-theme', this.checked?'light':'dark');
   updateCharts();
 });
 
-/* ─── HERO CANVAS ─── */
+/* ═══════════════════════════════════════
+   HERO CANVAS + PARALLAX
+═══════════════════════════════════════ */
 function initHeroCanvas() {
   const canvas = document.getElementById('hero-canvas');
   const ctx = canvas.getContext('2d');
   let W, H, pts = [];
   function resize() { W=canvas.width=canvas.offsetWidth; H=canvas.height=canvas.offsetHeight; }
   resize(); window.addEventListener('resize', resize);
-  for(let i=0;i<80;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3});
+  for(let i=0;i<90;i++) pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.25,vy:(Math.random()-0.5)*0.25,r:Math.random()*1.2+0.3});
   function draw() {
     ctx.clearRect(0,0,W,H);
     pts.forEach(p => {
       p.x+=p.vx; p.y+=p.vy;
       if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;
-      ctx.beginPath(); ctx.arc(p.x,p.y,1,0,Math.PI*2);
-      ctx.fillStyle='rgba(23,110,110,0.5)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(23,110,110,0.4)'; ctx.fill();
     });
     for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++) {
       const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(253,137,22,${0.1*(1-d/100)})`;ctx.lineWidth=0.5;ctx.stroke();}
+      if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(253,137,22,${0.08*(1-d/110)})`;ctx.lineWidth=0.5;ctx.stroke();}
     }
     requestAnimationFrame(draw);
   }
   draw();
 }
 
-/* ─── CHARTS ─── */
+/* Parallax on scroll */
+window.addEventListener('scroll', () => {
+  const sy = window.scrollY;
+  const hero = document.getElementById('hero');
+  if(hero) {
+    const hc = hero.querySelector('.hero-content');
+    if(hc) hc.style.transform = `translateY(${sy * 0.35}px)`;
+    const canvas = document.getElementById('hero-canvas');
+    if(canvas) canvas.style.transform = `translateY(${sy * 0.5}px)`;
+    const orb1 = hero.querySelector('.hero-orb-1');
+    const orb2 = hero.querySelector('.hero-orb-2');
+    const grid = hero.querySelector('.hero-grid-lines');
+    if(orb1) orb1.style.transform = `translateY(${sy * 0.2}px)`;
+    if(orb2) orb2.style.transform = `translateY(${sy * -0.15}px)`;
+    if(grid) grid.style.transform = `translateY(${sy * 0.1}px) perspective(600px) rotateX(10deg)`;
+  }
+});
+
+/* Mouse parallax for hero */
+document.getElementById('hero').addEventListener('mousemove', e => {
+  const { left,top,width,height } = document.getElementById('hero').getBoundingClientRect();
+  const nx = (e.clientX - left) / width - 0.5;
+  const ny = (e.clientY - top) / height - 0.5;
+  const orb1 = document.querySelector('.hero-orb-1');
+  const orb2 = document.querySelector('.hero-orb-2');
+  if(orb1) orb1.style.transform = `translate(${nx*30}px, ${ny*20}px)`;
+  if(orb2) orb2.style.transform = `translate(${nx*-20}px, ${ny*-15}px)`;
+});
+
+/* ═══════════════════════════════════════
+   3D TILT ON CARDS
+═══════════════════════════════════════ */
+document.querySelectorAll('.tilt-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const cx = rect.width/2, cy = rect.height/2;
+    const rx2 = (y - cy) / cy * -8, ry2 = (x - cx) / cx * 8;
+    card.style.transform = `perspective(800px) rotateX(${rx2}deg) rotateY(${ry2}deg) translateZ(8px)`;
+    card.style.setProperty('--mx', (x/rect.width*100)+'%');
+    card.style.setProperty('--my', (y/rect.height*100)+'%');
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateZ(0)';
+  });
+});
+
+/* ═══════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════ */
 let charts = {};
 function chartColors() {
   const dark = document.documentElement.getAttribute('data-theme') !== 'light';
-  return { grid: dark?'rgba(118,151,160,0.1)':'rgba(23,59,97,0.1)', tick: dark?'#7697A0':'#7697A0' };
+  return { grid: dark?'rgba(118,151,160,0.07)':'rgba(23,59,97,0.07)', tick: dark?'#7697A0':'#9aafb8' };
 }
 function initCharts() {
   const cc = chartColors();
-  const baseOpts = { responsive:true, animation:{duration:1000}, plugins:{legend:{labels:{color:cc.tick,font:{family:'DM Sans'}}}} };
-
-  // Earnings chart
+  const baseOpts = { responsive:true, animation:{duration:1200,easing:'easeOutQuart'}, plugins:{legend:{labels:{color:cc.tick,font:{family:'DM Sans',size:11}}}} };
   const days = ['1M','3M','5M','7M','9M','11M','13M','15M','17M','19M','21M','23M','25M','27M','29M'];
   const actual = [780,920,650,880,1020,760,900,840,970,700,850,1100,820,760,900];
   const expected = [880,900,880,900,900,900,920,900,920,900,900,920,900,900,900];
   const payouts = actual.map((a,i)=>Math.max(0,expected[i]-a));
-  charts.earnings = new Chart(document.getElementById('earningsChart'),{
-    type:'line',
-    data:{labels:days,datasets:[
-      {label:'AI Expected',data:expected,borderColor:'#176E6E',borderWidth:2,pointRadius:0,tension:0.4,fill:false},
-      {label:'Actual Earned',data:actual,borderColor:'#FD8916',borderWidth:2,pointRadius:3,tension:0.4,backgroundColor:'rgba(253,137,22,0.08)',fill:true},
-      {label:'Auto Payout',data:payouts,borderColor:'#4ade80',borderWidth:1.5,pointRadius:0,tension:0.4,fill:false,borderDash:[4,4]}
-    ]},
-    options:{...baseOpts,scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9},callback:v=>'₹'+v}}}}
-  });
+  charts.earnings = new Chart(document.getElementById('earningsChart'),{type:'line',data:{labels:days,datasets:[
+    {label:'AI Expected',data:expected,borderColor:'#176E6E',borderWidth:2,pointRadius:0,tension:0.4,fill:false},
+    {label:'Actual Earned',data:actual,borderColor:'#FD8916',borderWidth:2,pointRadius:3,pointBackgroundColor:'#FD8916',tension:0.4,backgroundColor:'rgba(253,137,22,0.07)',fill:true},
+    {label:'Auto Payout',data:payouts,borderColor:'#4ade80',borderWidth:1.5,pointRadius:0,tension:0.4,fill:false,borderDash:[4,4]}
+  ]},options:{...baseOpts,scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9},callback:v=>'₹'+v}}}}});
 
-  // Disruption pie
-  charts.disruption = new Chart(document.getElementById('disruptionChart'),{
-    type:'doughnut',
-    data:{labels:['Rain','Traffic','Platform Outage','Heat/AQI','Other'],
-      datasets:[{data:[1200,890,640,380,200],backgroundColor:['#176E6E','#FD8916','#173b61','#7697A0','#FFEBD0'],borderWidth:0}]},
-    options:{...baseOpts,cutout:'65%',plugins:{legend:{position:'right',labels:{color:cc.tick,font:{size:10},boxWidth:10}}}}
-  });
+  charts.disruption = new Chart(document.getElementById('disruptionChart'),{type:'doughnut',data:{labels:['Rain','Traffic','Platform Outage','Heat/AQI','Other'],datasets:[{data:[1200,890,640,380,200],backgroundColor:['#176E6E','#FD8916','#173b61','#7697A0','rgba(255,235,208,0.3)'],borderWidth:0,hoverOffset:8}]},options:{...baseOpts,cutout:'68%',plugins:{legend:{position:'right',labels:{color:cc.tick,font:{size:10},boxWidth:10,padding:12}}}}});
 
-  // Histogram
   const buckets=['₹500-600','₹600-700','₹700-800','₹800-900','₹900-1k','₹1k-1.1k'];
-  charts.hist = new Chart(document.getElementById('histChart'),{
-    type:'bar',
-    data:{labels:buckets,datasets:[{label:'Days',data:[2,4,7,8,5,3],backgroundColor:'rgba(23,110,110,0.6)',borderColor:'#176E6E',borderWidth:1,borderRadius:6}]},
-    options:{...baseOpts,plugins:{legend:{display:false}},scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}}}}
-  });
+  charts.hist = new Chart(document.getElementById('histChart'),{type:'bar',data:{labels:buckets,datasets:[{label:'Days',data:[2,4,7,8,5,3],backgroundColor:'rgba(23,110,110,0.5)',borderColor:'#176E6E',borderWidth:1,borderRadius:8,borderSkipped:false}]},options:{...baseOpts,plugins:{legend:{display:false}},scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}}}}});
 
-  // Recovery
   const weeks=['Week 1','Week 2','Week 3','Week 4'];
-  charts.recovery = new Chart(document.getElementById('recoveryChart'),{
-    type:'bar',
-    data:{labels:weeks,datasets:[
-      {label:'Lost Income',data:[980,1200,860,800],backgroundColor:'rgba(239,68,68,0.3)',borderColor:'#ef4444',borderWidth:1,borderRadius:4},
-      {label:'GigShield Would Pay',data:[980,1200,860,800],backgroundColor:'rgba(74,222,128,0.3)',borderColor:'#4ade80',borderWidth:1,borderRadius:4}
-    ]},
-    options:{...baseOpts,scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,callback:v=>'₹'+v,font:{size:9}}}}}
-  });
+  charts.recovery = new Chart(document.getElementById('recoveryChart'),{type:'bar',data:{labels:weeks,datasets:[
+    {label:'Lost Income',data:[980,1200,860,800],backgroundColor:'rgba(239,68,68,0.25)',borderColor:'#ef4444',borderWidth:1,borderRadius:6,borderSkipped:false},
+    {label:'GigShield Pays',data:[980,1200,860,800],backgroundColor:'rgba(74,222,128,0.25)',borderColor:'#4ade80',borderWidth:1,borderRadius:6,borderSkipped:false}
+  ]},options:{...baseOpts,scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{size:9}}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,callback:v=>'₹'+v,font:{size:9}}}}}});
 
-  // Week dashboard chart
   const wDays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  charts.week = new Chart(document.getElementById('weekChart'),{
-    type:'line',
-    data:{labels:wDays,datasets:[
-      {label:'AI Expected',data:[920,920,920,920,1050,1200,1200],borderColor:'#176E6E',borderWidth:2,pointRadius:0,tension:0.4,fill:false,borderDash:[5,3]},
-      {label:'Actual',data:[880,950,760,847,null,null,null],borderColor:'#FD8916',borderWidth:2.5,pointRadius:4,tension:0.4,backgroundColor:'rgba(253,137,22,0.06)',fill:true},
-      {label:'Payout',data:[40,0,160,73,null,null,null],borderColor:'#4ade80',borderWidth:1.5,pointRadius:3,tension:0.4,fill:false}
-    ]},
-    options:{...baseOpts,scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,callback:v=>'₹'+v}}}}
-  });
+  charts.week = new Chart(document.getElementById('weekChart'),{type:'line',data:{labels:wDays,datasets:[
+    {label:'AI Expected',data:[920,920,920,920,1050,1200,1200],borderColor:'#176E6E',borderWidth:2,pointRadius:0,tension:0.4,fill:false,borderDash:[5,3]},
+    {label:'Actual',data:[880,950,760,847,null,null,null],borderColor:'#FD8916',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#FD8916',tension:0.4,backgroundColor:'rgba(253,137,22,0.05)',fill:true},
+    {label:'Payout',data:[40,0,160,73,null,null,null],borderColor:'#4ade80',borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#4ade80',tension:0.4,fill:false}
+  ]},options:{...baseOpts,scales:{x:{grid:{color:cc.grid},ticks:{color:cc.tick}},y:{grid:{color:cc.grid},ticks:{color:cc.tick,callback:v=>'₹'+v}}}}});
 }
 function updateCharts() { Object.values(charts).forEach(c=>c.update()); }
 
-/* ─── ZONE MAP ─── */
+/* ═══════════════════════════════════════
+   ZONE MAP
+═══════════════════════════════════════ */
 function initZoneGrid() {
   const grid = document.getElementById('zoneGrid');
   const types = ['low','low','low','med','med','high'];
@@ -1274,11 +1399,31 @@ function initZoneGrid() {
     const cell = document.createElement('div');
     if(i===14) { cell.className='zone-cell zone-you'; cell.title='📍 You'; }
     else { const t=types[Math.floor(Math.random()*types.length)]; cell.className=`zone-cell zone-${t}`; }
+    cell.style.transitionDelay = (i*0.02)+'s';
     grid.appendChild(cell);
   }
 }
 
-/* ─── ONBOARDING ─── */
+/* ═══════════════════════════════════════
+   SIGNAL BAR ANIMATION
+═══════════════════════════════════════ */
+function animateSignalBars() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        entry.target.querySelectorAll('.signal-bar-fill').forEach((bar, i) => {
+          setTimeout(() => bar.classList.add('animated'), i * 200);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.3});
+  document.querySelectorAll('.security-card').forEach(c => observer.observe(c));
+}
+
+/* ═══════════════════════════════════════
+   ONBOARDING
+═══════════════════════════════════════ */
 let currentStep=1, selectedPlan='Pro';
 function openOnboarding(){document.getElementById('onboarding').classList.add('show');}
 function closeOnboarding(){document.getElementById('onboarding').classList.remove('show');}
@@ -1286,33 +1431,43 @@ function goStep(n){
   document.getElementById('step-'+currentStep).classList.remove('active');
   currentStep=n;
   document.getElementById('step-'+n).classList.add('active');
-  if(n===3){document.getElementById('chosen-plan').textContent=selectedPlan+' Shield';}
+  if(n===3) document.getElementById('chosen-plan').textContent=selectedPlan+' Shield';
 }
 function selectPlan(el,name){
   selectedPlan=name;
-  document.querySelectorAll('#step-2 .plan-card').forEach(c=>c.style.outline='none');
-  el.style.outline='2px solid var(--orange)';
+  document.querySelectorAll('#step-2 .plan-card').forEach(c=>{c.style.outline='none';c.style.transform='';});
+  el.style.outline='2px solid rgba(253,137,22,0.6)';
+  el.style.transform='translateY(-4px)';
 }
 
-/* ─── CHAT ─── */
+/* ═══════════════════════════════════════
+   CHAT
+═══════════════════════════════════════ */
 const aiResponses = {
   'My earnings today': "Today you've earned ₹847 so far. Your AI expected ₹920 based on your Thursday pattern, so there's a ₹73 gap. With rain expected at 16:00, I've armed auto-cover for an additional ₹180. Your evening shift (19:00–22:00) should recover ~₹380.",
   'Last payout': "Your last auto-payout was ₹95 for the Swiggy outage at 11:47 today. It took 38 seconds from detection to payout. Your total all-time payouts are ₹1,247 across 12 claims, with a 91.7% auto-approval rate.",
-  'Will it rain today?': "Yes! Heavy rain is predicted for Anna Nagar at 16:00 with 72% probability. Orders typically drop 38% during this. I've pre-armed your rain coverage — if your earnings dip more than ₹180, your payout will trigger automatically. Consider relocating to T.Nagar for better earnings.",
-  'My trust score': "Your trust score is 98/100 — Excellent! All 7 signals are green: GPS Consistency 95%, Movement Pattern 91%, Device Fingerprint 100%, Behavioural History 94%, Network Anomaly 97%, Environmental Consistency 88%, and Order Activity 98%. You've been clean for 47 days. Payouts are fully automatic for you.",
-  'Best zone right now': "Right now T.Nagar is the best zone — low disruption risk and high order density. OMR has a traffic jam (avoid). Anna Nagar has rain incoming at 16:00. If you're in Velachery, you're in a medium-risk zone. Shifting to T.Nagar could give you +₹140/hr based on current patterns.",
-  'Explain my coverage': "You're on Pro Shield (₹99/week). You're covered for: All weather events, Platform outages (Swiggy, Zomato, Blinkit, etc.), Traffic disruptions, Partial income loss, and Smart relocation alerts. Your weekly max payout is ₹1,500. Claims trigger automatically — no forms needed. Your next billing is ₹94 (AI lowered it because your trust score improved)."
+  'Will it rain today?': "Yes! Heavy rain is predicted for Anna Nagar at 16:00 with 72% probability. Orders typically drop 38% during this. I've pre-armed your rain coverage — if your earnings dip more than ₹180, your payout will trigger automatically. Consider relocating to T.Nagar.",
+  'My trust score': "Your trust score is 98/100 — Excellent! All 7 signals are green: GPS Consistency 95%, Movement Pattern 91%, Device Fingerprint 100%, Behavioural History 94%, Network Anomaly 97%, Environmental Consistency 88%, Order Activity 98%. 47 days clean — payouts are fully automatic.",
+  'Best zone right now': "Right now T.Nagar is the best zone — low disruption risk and high order density. OMR has a traffic jam (avoid). Anna Nagar has rain incoming at 16:00. Shifting to T.Nagar could give you +₹140/hr based on current patterns.",
+  'Explain my coverage': "You're on Pro Shield (₹99/week). You're covered for: all weather events, platform outages (Swiggy, Zomato, Blinkit, etc.), traffic disruptions, partial income loss, and smart relocation alerts. Weekly max: ₹1,500. Your next billing is ₹94 — AI lowered it due to improved trust score."
 };
+
 function sendQuick(q){document.getElementById('chatInput').value=q;sendMsg();}
 function sendMsg(){
   const inp=document.getElementById('chatInput');
   const msg=inp.value.trim(); if(!msg) return;
-  addMsg(msg,'user');
-  inp.value='';
+  addMsg(msg,'user'); inp.value='';
+  // Typing indicator
+  const typingDiv = document.createElement('div');
+  typingDiv.className='msg msg-ai'; typingDiv.id='typing';
+  typingDiv.innerHTML='<div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
+  const msgs=document.getElementById('chatMessages');
+  msgs.appendChild(typingDiv); msgs.scrollTop=msgs.scrollHeight;
   setTimeout(()=>{
-    const r=aiResponses[msg]||"I'm analysing your data now… Based on your profile and current conditions, I'll give you a detailed response in a moment. You can also ask me about your earnings, claims, zone conditions, or coverage details!";
+    const t=document.getElementById('typing'); if(t)t.remove();
+    const r=aiResponses[msg]||"I'm analysing your data now… Based on your profile and current conditions, I'll give you a detailed response. You can also ask about earnings, claims, zone conditions, or coverage!";
     addMsg(r,'ai');
-  },600);
+  },1200);
 }
 function addMsg(text,role){
   const div=document.createElement('div');
@@ -1323,11 +1478,13 @@ function addMsg(text,role){
   msgs.scrollTop=msgs.scrollHeight;
 }
 
-/* ─── SCROLL ANIMATIONS ─── */
-const observer=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+/* ═══════════════════════════════════════
+   SCROLL REVEAL + STAGGER
+═══════════════════════════════════════ */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold:0.08, rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.fade-in,.fade-in-left,.fade-in-right').forEach(el => observer.observe(el));
 </script>
 </body>
 </html>
